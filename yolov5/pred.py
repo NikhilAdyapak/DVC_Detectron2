@@ -65,7 +65,7 @@ import cv2
 # print(annots_data)
 
 model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True, _verbose =False )
-base_path = '/home/yln1kor/test/Datasets/archive/Test/Test/JPEGImages'
+base_path = '/home/yln1kor/nikhil-test/Datasets/archive/Test/Test/JPEGImages'
 for i in range(1,15):
     local_path = 'image (' + str(i) + ').jpg'
     img = cv2.imread(os.path.join(base_path, local_path))
