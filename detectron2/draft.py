@@ -237,7 +237,7 @@ def detectron_data_load():
     # custom_visualization(dataset_dicts,my_dataset_train_metadata)
 
 
-def detectron_train():
+def detectron_custom_train():
     # Custom Training
     global dataset_name_train,dataset_name_test,cfg,predictor
     cfg = get_cfg()
@@ -268,6 +268,59 @@ def detectron_train():
 
     # os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     # trainer = CocoTrainer(cfg)
+    # trainer.resume_or_load(resume=False)
+    # trainer.train()
+
+    # # Roboflow custom Training Blood Dataset
+    # cfg = get_cfg()
+    # cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml"))
+    # cfg.DATASETS.TRAIN = ("my_dataset_train",)
+    # cfg.DATASETS.TEST = ("my_dataset_val",)
+
+    # cfg.DATALOADER.NUM_WORKERS = 4
+    # cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml")  # Let training initialize from model zoo
+    # cfg.SOLVER.IMS_PER_BATCH = 4
+    # cfg.SOLVER.BASE_LR = 0.001
+
+
+    # cfg.SOLVER.WARMUP_ITERS = 1000
+    # cfg.SOLVER.MAX_ITER = 1500 #adjust up if val mAP is still rising, adjust down if overfit
+    # cfg.SOLVER.STEPS = (1000, 1500)
+    # cfg.SOLVER.GAMMA = 0.05
+
+
+
+
+    # cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 64
+    # cfg.MODEL.ROI_HEADS.NUM_CLASSES = 4 #your number of classes + 1
+
+    # cfg.TEST.EVAL_PERIOD = 500
+
+
+    # os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
+    # trainer = CocoTrainer(cfg)
+    # trainer.resume_or_load(resume=False)
+    # trainer.train()
+
+    # # Kaggle custom dataset Training
+    # #from detectron2.engine import DefaultTrainer
+
+    # cfg = get_cfg()
+    # cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"))
+    # cfg.DATASETS.TRAIN = ("physics_train",)
+    # cfg.DATASETS.TEST = ()
+    # cfg.DATALOADER.NUM_WORKERS = 2
+    # cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml")  # Let training initialize from model zoo
+    # cfg.SOLVER.IMS_PER_BATCH = 2
+    # cfg.SOLVER.BASE_LR = 0.00025  # pick a good LR
+    # cfg.SOLVER.MAX_ITER = 10000    # 300 iterations seems good enough for this toy dataset; you will need to train longer for a practical dataset
+    # cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512   # faster, and good enough for this toy dataset (default: 512)
+    # cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (ballon). (see https://detectron2.readthedocs.io/tutorials/datasets.html#update-the-config-for-new-datasets)
+    # # NOTE: this config means the number of classes, but a few popular unofficial tutorials incorrect uses num_classes+1 here.
+
+    # os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
+    # # uncomment below to train
+    # trainer = DefaultTrainer(cfg) 
     # trainer.resume_or_load(resume=False)
     # trainer.train()
 
@@ -328,6 +381,6 @@ if __name__ == "__main__":
     #     fout.write(json.dumps(dataset, indent = 4))
 
     detectron_data_load()
-    # detectron_train()
+    # detectron_custom_train()
     detectron_visualize()
     detectron_evaluator()
