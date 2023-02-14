@@ -319,8 +319,6 @@ def detectron_evaluator():
 
 if __name__ == "__main__":
     # os.environ['CUDA_VISIBLE_DEVICES']='0'
-    base_path_train = '/home/yln1kor/nikhil-test/Datasets/archive/Train/Train/JPEGImages'
-    annot_path_train = '/home/yln1kor/nikhil-test/Datasets/archive/Train/Train/Annotations'
     # load_model()
     # overall_output = predict(base_path)
     # visualize(overall_output,base_path)
