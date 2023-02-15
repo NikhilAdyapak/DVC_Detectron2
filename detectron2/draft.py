@@ -26,6 +26,11 @@ from detectron2.evaluation import COCOEvaluator
 
 from detectron2.evaluation import inference_on_dataset
 
+from collections import OrderedDict
+
+from flask import Flask, request
+app = Flask(__name__)
+
 
 def load_model():
     global cfg
@@ -223,6 +228,7 @@ def detectron_data_load(cache):
     predictor = cache["predictor"]
     dataset_name_train = cache["train"]
     dataset_name_test = cache["test"]
+    results = cache["results"]
 
     dataset_name_train = "karthika95_dataset_train"
     dataset_name_test = "karthika95_dataset_test"
@@ -250,7 +256,7 @@ def detectron_data_load(cache):
     # dataset_dicts = DatasetCatalog.get(dataset_name_train)
     # custom_visualization(dataset_dicts,my_dataset_train_metadata)
 
-    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test}
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test,"results":results}
     return cache
 
 
@@ -261,6 +267,7 @@ def detectron_custom_train(cache):
     predictor = cache["predictor"]
     dataset_name_train = cache["train"]
     dataset_name_test = cache["test"]
+    results = cache["results"]
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml"))
@@ -347,7 +354,7 @@ def detectron_custom_train(cache):
     # trainer.resume_or_load(resume=False)
     # trainer.train()
 
-    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test}
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test,"results":results}
     return cache
 
 
@@ -360,6 +367,7 @@ def detectron_visualize(cache):
     predictor = cache["predictor"]
     dataset_name_train = cache["train"]
     dataset_name_test = cache["test"]
+    results = cache["results"]
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml"))
@@ -391,7 +399,7 @@ def detectron_visualize(cache):
         cv2.waitKey(0)
     cv2.destroyAllWindows()
     
-    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test}
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test,"results":results}
     return cache
 
 
@@ -402,13 +410,32 @@ def detectron_evaluator(cache):
     predictor = cache["predictor"]
     dataset_name_train = cache["train"]
     dataset_name_test = cache["test"]
+    results = cache["results"]
 
     evaluator = COCOEvaluator(dataset_name_test, cfg, False, output_dir="./output/")
     val_loader = build_detection_test_loader(cfg, dataset_name_test)
     eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
+    # OrderedDict([('bbox', {'AP': 57.332991072547934, 'AP50': 80.06881315052435, 'AP75': 65.82521254362214, 'APs': 62.61058631793035, 'APm': nan, 'APl': nan})])
 
-    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test}
+    d1 = next(iter(eval_results.items()))
+    d2 = next(iter(eval_results.values()))
+
+    d = {'AP':d2["AP"],'AP50':d2["AP50"],'AP75':d2["AP75"],'APs':d2['APs']}
+    s1 = json.dumps(d)
+    results = json.loads(s1)
+
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test,"results":results}
     return cache
+
+@app.route('/')
+def home_endpoint():
+    return 'Hello World!'
+
+
+@app.route('/results')
+def get_results():
+    global cache
+    return cache["results"]
 
 
 if __name__ == "__main__":
@@ -422,8 +449,9 @@ if __name__ == "__main__":
     #     fout.write(json.dumps(dataset, indent = 4))
 
     cache = dict()
-    cache = {"cfg":None,"predictor":None,"train":None,"test":None}
+    cache = {"cfg":None,"predictor":None,"train":None,"test":None,"results":None}
     cache = detectron_data_load(cache)
     # cache = detectron_custom_train()
     cache = detectron_visualize(cache)
     cache = detectron_evaluator(cache)
+    app.run(host='0.0.0.0', port=5000)
