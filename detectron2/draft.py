@@ -123,6 +123,7 @@ def custom_dataset_function_train():
     
     base_path = '/home/yln1kor/nikhil-test/Datasets/archive/Train/Train/JPEGImages'
     annot_path = '/home/yln1kor/nikhil-test/Datasets/archive/Train/Train/Annotations'
+    # # Change Paths
 
     dataset = []
     annotations = []
@@ -167,6 +168,7 @@ def custom_dataset_function_test():
     
     base_path = '/home/yln1kor/nikhil-test/Datasets/archive/Test/Test/JPEGImages'
     annot_path = '/home/yln1kor/nikhil-test/Datasets/archive/Test/Test/Annotations'
+    # # Change Paths
 
     dataset = []
     annotations = []
@@ -224,12 +226,14 @@ def detectron_data_load(cache):
 
     dataset_name_train = "karthika95_dataset_train"
     dataset_name_test = "karthika95_dataset_test"
+    # # Change Name
 
     DatasetCatalog.register(dataset_name_train, custom_dataset_function_train)
     MetadataCatalog.get(dataset_name_train).set(thing_classes = ["person"])
 
     DatasetCatalog.register(dataset_name_test, custom_dataset_function_test)
     MetadataCatalog.get(dataset_name_test).set(thing_classes = ["person"])
+    # # Change thing_classes
 
     # from detectron2.data.datasets import register_coco_instances
     # register_coco_instances("my_dataset_train", {}, "/content/train/_annotations.coco.json", "/content/train")
@@ -260,11 +264,15 @@ def detectron_custom_train(cache):
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml"))
+    # # Change yaml model file
+
     cfg.DATASETS.TRAIN = (dataset_name_train,)
     # cfg.DATASETS.TEST = (dataset_name_test,)
 
     cfg.DATALOADER.NUM_WORKERS = 2
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml")  # Let training initialize from model zoo
+    # # Change yaml model file
+    
     cfg.SOLVER.IMS_PER_BATCH = 1
     cfg.SOLVER.BASE_LR = 0.001
 
