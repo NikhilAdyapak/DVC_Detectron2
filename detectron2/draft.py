@@ -216,7 +216,6 @@ def custom_visualization(dataset_dicts,my_dataset_train_metadata):
 
 def detectron_data_load(cache):
     # torch.cuda.empty_cache()
-    # global dataset_name_train,dataset_name_test,cfg,predictor
 
     cfg = cache["cfg"]
     predictor = cache["predictor"]
@@ -253,7 +252,6 @@ def detectron_data_load(cache):
 
 def detectron_custom_train(cache):
     # Custom Training
-    # global dataset_name_train,dataset_name_test,cfg,predictor
 
     cfg = cache["cfg"]
     predictor = cache["predictor"]
@@ -308,9 +306,6 @@ def detectron_custom_train(cache):
     # cfg.SOLVER.STEPS = (1000, 1500)
     # cfg.SOLVER.GAMMA = 0.05
 
-
-
-
     # cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 64
     # cfg.MODEL.ROI_HEADS.NUM_CLASSES = 4 #your number of classes + 1
 
@@ -352,8 +347,7 @@ def detectron_visualize(cache):
     # # Detectron2 Visualizer
 
     # cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")  # path to the model we just trained
-    # global dataset_name_train,dataset_name_test,cfg,predictor
-    
+
     cfg = cache["cfg"]
     predictor = cache["predictor"]
     dataset_name_train = cache["train"]
@@ -395,7 +389,6 @@ def detectron_visualize(cache):
 
 def detectron_evaluator(cache):
     # # Detectron Evaluator
-    # global dataset_name_train,dataset_name_test,cfg,predictor
 
     cfg = cache["cfg"]
     predictor = cache["predictor"]
