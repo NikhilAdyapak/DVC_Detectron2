@@ -56,6 +56,7 @@ def get_prediction():
     #     data = np.array(data)[np.newaxis, :]  # converts shape from (4,) to (1, 4)
     #     prediction = model.predict(data)  # runs globally loaded model on the data
     # return str(prediction[0])
+
     total = ''
     data = [5.9,3.0,5.1,1.8]
     data = np.array(data)[np.newaxis, :]
@@ -69,8 +70,22 @@ def get_prediction():
         prediction = model.predict(data)
         total += ' ' + str(prediction[0])
     return total
+    # global cache 
+    # return cache["results"]
  
 if __name__ == '__main__':
+    import json
+    from collections import OrderedDict
+
+    d = OrderedDict([('bbox', {'AP': 57.332991072547934, 'AP50': 80.06881315052435, 'AP75': 65.82521254362214, 'APs': 62.61058631793035, 'APm': None, 'APl': None})])
+    d1 = next(iter(d.items()))
+    d2 = next(iter(d.values()))
+    # d2 = {'AP': 57.332991072547934, 'AP50': 80.06881315052435, 'AP75': 65.82521254362214, 'APs': 62.61058631793035, 'APm': nan, 'APl': nan} 
+    d = {'AP':d2["AP"],'AP50':d2["AP50"],'AP75':d2["AP75"],'APs':d2['APs']}
+    s1 = json.dumps(d)
+    d2 = json.loads(s1)
+
     train_model()
     load_model()  # load model at the beginning once only
+    cache = {"cfg":None,"predictor":None,"train":None,"test":None,"results":d2}
     app.run(host='0.0.0.0', port=5000)
