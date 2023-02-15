@@ -214,9 +214,15 @@ def custom_visualization(dataset_dicts,my_dataset_train_metadata):
     cv2.destroyAllWindows()
 
 
-def detectron_data_load():
+def detectron_data_load(cache):
     # torch.cuda.empty_cache()
-    global dataset_name_train,dataset_name_test,cfg,predictor
+    # global dataset_name_train,dataset_name_test,cfg,predictor
+
+    cfg = cache["cfg"]
+    predictor = cache["predictor"]
+    dataset_name_train = cache["train"]
+    dataset_name_test = cache["test"]
+
     dataset_name_train = "karthika95_dataset_train"
     dataset_name_test = "karthika95_dataset_test"
 
@@ -225,6 +231,11 @@ def detectron_data_load():
 
     DatasetCatalog.register(dataset_name_test, custom_dataset_function_test)
     MetadataCatalog.get(dataset_name_test).set(thing_classes = ["person"])
+
+    # from detectron2.data.datasets import register_coco_instances
+    # register_coco_instances("my_dataset_train", {}, "/content/train/_annotations.coco.json", "/content/train")
+    # register_coco_instances("my_dataset_val", {}, "/content/valid/_annotations.coco.json", "/content/valid")
+    # register_coco_instances("my_dataset_test", {}, "/content/test/_annotations.coco.json", "/content/test")
 
     # dataset_dicts = DatasetCatalog.get(dataset_name_train)
     # print(dataset_dicts[0],len(dataset_dicts))
@@ -236,10 +247,19 @@ def detectron_data_load():
     # dataset_dicts = DatasetCatalog.get(dataset_name_train)
     # custom_visualization(dataset_dicts,my_dataset_train_metadata)
 
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test}
+    return cache
 
-def detectron_custom_train():
+
+def detectron_custom_train(cache):
     # Custom Training
-    global dataset_name_train,dataset_name_test,cfg,predictor
+    # global dataset_name_train,dataset_name_test,cfg,predictor
+
+    cfg = cache["cfg"]
+    predictor = cache["predictor"]
+    dataset_name_train = cache["train"]
+    dataset_name_test = cache["test"]
+
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml"))
     cfg.DATASETS.TRAIN = (dataset_name_train,)
@@ -324,18 +344,27 @@ def detectron_custom_train():
     # trainer.resume_or_load(resume=False)
     # trainer.train()
 
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test}
+    return cache
 
-def detectron_visualize():
+
+def detectron_visualize(cache):
     # # Detectron2 Visualizer
 
     # cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")  # path to the model we just trained
-    global dataset_name_train,dataset_name_test,cfg,predictor
+    # global dataset_name_train,dataset_name_test,cfg,predictor
+    
+    cfg = cache["cfg"]
+    predictor = cache["predictor"]
+    dataset_name_train = cache["train"]
+    dataset_name_test = cache["test"]
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml"))
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7 
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml")
     predictor = DefaultPredictor(cfg)
+
     # DatasetCatalog.register(dataset_name_test, custom_dataset_function_test)
     # MetadataCatalog.get(dataset_name_test).set(thing_classes = ["person"])
 
@@ -359,15 +388,26 @@ def detectron_visualize():
         cv2.imshow("output",out.get_image()[:, :, ::-1])
         cv2.waitKey(0)
     cv2.destroyAllWindows()
+    
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test}
+    return cache
 
 
-def detectron_evaluator():
+def detectron_evaluator(cache):
     # # Detectron Evaluator
+    # global dataset_name_train,dataset_name_test,cfg,predictor
 
-    global dataset_name_train,dataset_name_test,cfg,predictor
+    cfg = cache["cfg"]
+    predictor = cache["predictor"]
+    dataset_name_train = cache["train"]
+    dataset_name_test = cache["test"]
+
     evaluator = COCOEvaluator(dataset_name_test, cfg, False, output_dir="./output/")
     val_loader = build_detection_test_loader(cfg, dataset_name_test)
     eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
+
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test}
+    return cache
 
 
 if __name__ == "__main__":
@@ -380,7 +420,9 @@ if __name__ == "__main__":
     #     # json.dump(dataset, fout)
     #     fout.write(json.dumps(dataset, indent = 4))
 
-    detectron_data_load()
-    # detectron_custom_train()
-    detectron_visualize()
-    detectron_evaluator()
+    cache = dict()
+    cache = {"cfg":None,"predictor":None,"train":None,"test":None}
+    cache = detectron_data_load(cache)
+    # cache = detectron_custom_train()
+    cache = detectron_visualize(cache)
+    cache = detectron_evaluator(cache)
