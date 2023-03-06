@@ -38,6 +38,7 @@ from tqdm import tqdm
 
 from helper.xml_to_df import *
 from helper.custom_evaluate import *
+from helper.txt_to_df import *
 
 if len(sys.argv) != 5:
     sys.stderr.write('Arguments error. Usage:\n')
