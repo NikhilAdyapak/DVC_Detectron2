@@ -1,2 +1,42 @@
+dataset:
+  path: /home/yln1kor/nikhil-test/Datasets/archive
+
 ingest:
-  dcount: 4
+  dcount: 3
+
+train:
+  img_path: Train/Train/JPEGImages
+  annot_path: Train/Train/Annotations
+  dataset_name: karthika95_dataset_train
+
+# output:
+#   modelsave_path: output/model.h5
+#   loss_graph: output/lossplot.png
+#   test_split: output/test.txt
+
+test:
+  model: output/model_final.pth
+  img_path: Val/Val/JPEGImages
+  annot_path: Val/Val/Annotations
+  dataset_name: karthika95_dataset_test
+
+parameters:
+  # initial_lr: 1e-4 
+  # epochs: 100
+  # batch_size: 64
+  config_file: COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml
+  NUM_WORKERS: 2
+  IMS_PER_BATCH: 2
+  BASE_LR: 0.00025
+  MAX_ITER: 1000
+  BATCH_SIZE_PER_IMAGE: 512
+  NUM_CLASSES: 1
+
+output:
+  model: output/model_final.pth
+  results: results/
+  base_dir: output/
+  results_pretrained: pretrained_results/
+
+option:
+  custom: False
