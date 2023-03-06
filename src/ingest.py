@@ -31,7 +31,7 @@ os.makedirs(data_path, exist_ok = True)
 os.makedirs(origimg_path, exist_ok = True)
 
 print("-------------------------------")
-print("Extracting data.....")
+print("Ingesting Data.....")
 print("-------------------------------")
 
 copy_tree(input_dir, data_path)

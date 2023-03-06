@@ -103,7 +103,7 @@ test_annot_path = params['test']['annot_path']
 train_output_annot = creatingInfoData(train_annot_path)
 test_output_annot = creatingInfoData(test_annot_path)
 print("-------------------------------")
-print("Converting XML files to dataframe.....")
+print("Transforming.....")
 print("-------------------------------")
 train_output_annot.to_pickle(os.path.join(outputannot,'v{}_train.pkl'.format(params['ingest']['dcount'])))
 test_output_annot.to_pickle(os.path.join(outputannot,'v{}_test.pkl'.format(params['ingest']['dcount'])))
