@@ -1,0 +1,80 @@
+stages:
+  ingest:
+    cmd: python3 src/ingest.py
+    deps:
+    - src/ingest.py
+    params:
+    - ingest.dcount
+    outs:
+    - data/prepared
+
+  augment:
+    cmd: python3 src/augment.py data/prepared data/augmented
+    deps:
+    - src/augment.py
+    - data/prepared
+    params:
+    - ingest.dcount
+    outs:
+    - data/augmented
+
+  transform:
+    cmd: python3 src/transform.py data/prepared data/augmented data/transformed
+    deps:
+    - src/transform.py
+    - data/augmented
+    params:
+    - ingest.dcount
+    outs:
+    - data/transformed
+
+  split:
+    cmd: python3 src/split.py data/prepared data/transformed data/split
+    deps:
+    - src/split.py
+    - data/transformed
+    params:
+    - ingest.dcount
+    outs:
+    - data/split
+  
+  infer:
+    cmd: python3 src/infer.py data/prepared data/transformed data/infer data/store
+    deps:
+    - src/infer.py
+    - data/split
+    params:
+    - ingest.dcount
+    outs:
+    - data/infer
+
+  train:
+    cmd: python3 src/train.py data/prepared data/transformed data/train data/predict
+    deps:
+    - src/infer.py
+    - data/split
+    params:
+    - ingest.dcount
+    outs:
+    - data/train
+
+  predict:
+    cmd: python3 src/predict.py data/train data/predict data/store
+    deps:
+    - data/train
+    - src/predict.py
+    params:
+    - ingest.dcount
+    outs:
+    - data/predict
+
+  exit:
+    cmd: python3 src/exit.py data/infer data/predict data/store
+    deps:
+    - data/infer
+    - data/predict
+    - src/exit.py
+    params:
+    - ingest.dcount
+    outs:
+    - data/store

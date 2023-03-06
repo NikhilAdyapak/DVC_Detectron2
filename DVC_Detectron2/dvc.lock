@@ -1,0 +1,170 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python3 src/ingest.py
+    deps:
+    - path: src/ingest.py
+      md5: 4b52af3eba6cc29f547790c93220a863
+      size: 1258
+    params:
+      params.yaml:
+        ingest.dcount: 3
+    outs:
+    - path: data/prepared
+      md5: 543b83328125c691146cc2b4ae087509.dir
+      size: 198800641
+      nfiles: 2681
+  predict:
+    cmd: python3 src/predict.py data/train data/predict data/store
+    deps:
+    - path: data/train
+      md5: 5c4877914e6780e90789e96ba9b5c62b.dir
+      size: 524
+      nfiles: 3
+    - path: src/predict.py
+      md5: 33c1339d40b4384f94e18142af857d0c
+      size: 631
+    params:
+      params.yaml:
+        ingest.dcount: 3
+    outs:
+    - path: data/predict
+      md5: 5c4877914e6780e90789e96ba9b5c62b.dir
+      size: 524
+      nfiles: 3
+  transform:
+    cmd: python3 src/transform.py data/prepared data/augmented data/transformed
+    deps:
+    - path: data/augmented
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+    - path: src/transform.py
+      md5: 811d5416cbfb52c9a3fd114bbed89c08
+      size: 4257
+    params:
+      params.yaml:
+        ingest.dcount: 3
+    outs:
+    - path: data/transformed
+      md5: ae4d79a6a92209c437f2d3378ac38c57.dir
+      size: 1226
+      nfiles: 2
+  evaluate:
+    cmd: python3 src/evaluate.py data/prepared data/transformed data/predictions data/evaluated
+      data/store
+    deps:
+    - path: data/predictions
+      md5: cf841d9a3a1d0a55ebc45bbc0b1c4f28.dir
+      size: 2374
+      nfiles: 1
+    - path: data/prepared
+      md5: 71d6409b1e4cc58abcfd977601796365.dir
+      size: 805019
+      nfiles: 20
+    - path: data/transformed
+      md5: 29152de1cc3a7a1d84b4b0e8967aefa6.dir
+      size: 2432
+      nfiles: 1
+    params:
+      params.yaml:
+        ingest.dcount: 3
+    outs:
+    - path: data/evaluated
+      md5: ce16fe40159574e1c82c7436f228e3e6.dir
+      size: 853125
+      nfiles: 10
+  augment:
+    cmd: python3 src/augment.py data/prepared data/augmented
+    deps:
+    - path: data/prepared
+      md5: 543b83328125c691146cc2b4ae087509.dir
+      size: 198800641
+      nfiles: 2681
+    - path: src/augment.py
+      md5: 5cf529569ccfbdb20ecfe4679ce274e2
+      size: 515
+    params:
+      params.yaml:
+        ingest.dcount: 3
+    outs:
+    - path: data/augmented
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+  split:
+    cmd: python3 src/split.py data/prepared data/transformed data/split
+    deps:
+    - path: data/transformed
+      md5: ae4d79a6a92209c437f2d3378ac38c57.dir
+      size: 1226
+      nfiles: 2
+    - path: src/split.py
+      md5: dae10c48a77fc5622782b02e1bdba0ca
+      size: 542
+    params:
+      params.yaml:
+        ingest.dcount: 3
+    outs:
+    - path: data/split
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+  train:
+    cmd: python3 src/train.py data/prepared data/transformed data/train data/predict
+    deps:
+    - path: data/split
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+    - path: src/infer.py
+      md5: b1735ec5a83a92f1e04fd34d9e2dcc40
+      size: 11159
+    params:
+      params.yaml:
+        ingest.dcount: 3
+    outs:
+    - path: data/train
+      md5: 5c4877914e6780e90789e96ba9b5c62b.dir
+      size: 524
+      nfiles: 3
+  infer:
+    cmd: python3 src/infer.py data/prepared data/transformed data/infer data/store
+    deps:
+    - path: data/split
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+    - path: src/infer.py
+      md5: b1735ec5a83a92f1e04fd34d9e2dcc40
+      size: 11159
+    params:
+      params.yaml:
+        ingest.dcount: 3
+    outs:
+    - path: data/infer
+      md5: 5bd846d6665aab69c21b776206bdbf19.dir
+      size: 448
+      nfiles: 2
+  exit:
+    cmd: python3 src/exit.py data/infer data/predict data/store
+    deps:
+    - path: data/infer
+      md5: 5bd846d6665aab69c21b776206bdbf19.dir
+      size: 448
+      nfiles: 2
+    - path: data/predict
+      md5: 5c4877914e6780e90789e96ba9b5c62b.dir
+      size: 524
+      nfiles: 3
+    - path: src/exit.py
+      md5: f41b4ee9823cddf8a8457d0f0227fe86
+      size: 713
+    params:
+      params.yaml:
+        ingest.dcount: 3
+    outs:
+    - path: data/store
+      md5: 4489fc09ed7c559ec4a26853e683e84f.dir
+      size: 972
+      nfiles: 5
