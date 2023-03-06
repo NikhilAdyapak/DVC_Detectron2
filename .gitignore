@@ -1,14 +1,10 @@
-
-Custom_Object_Detection/
-
-
 /buffer
 .streamlit
 
-DVC_Detectron2/det2_env/
+det2_env/
 
-DVC_Detectron2/dataset/
+dataset/
 
-DVC_Detectron2/output/
+output/
 
-DVC_Detectron2/src/helper/__pycache__
+src/helper/__pycache__
