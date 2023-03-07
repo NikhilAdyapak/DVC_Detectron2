@@ -87,25 +87,6 @@ def creatingInfoData(Annotpath):
     return xml_df
 
 
-def aug_img_df(Annotpath):
-    aug_list = []
-    for files in sorted(glob.glob(str(Annotpath+'/*.txt*'))):
-        with open(files, "r") as f:
-            data = (f.read()).split()
-        value = (
-            int(data[0]),
-            int(data[1]),
-            int(data[2]),
-            int(data[3]),
-            files,
-            int(data[4]),
-        )
-        aug_list.append(value)
-    column_name = ['xmin', 'ymin', 'xmax', 'ymax', 'name', 'label']
-    aug_df = pd.DataFrame(aug_list, columns = column_name)
-    return aug_df
-
-
 if len(sys.argv) != 4:
     sys.stderr.write('Arguments error. Usage:\n')
     sys.stderr.write(
@@ -117,23 +98,12 @@ outputannot = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
 os.makedirs(outputannot, exist_ok = True)
 
 train_annot_path = params['train']['annot_path']
-train_aug_path = params['train']['aug_annot_path']
-
 test_annot_path = params['test']['annot_path']
-test_aug_path = params['test']['aug_annot_path']
 
-df1 = creatingInfoData(train_annot_path)
-# df2 = aug_img_df(train_aug_path)
-df2 = None
-train_output_annot = pd.concat([df1,df2])
-
-df1 = creatingInfoData(test_annot_path)
-# df2 = aug_img_df(test_aug_path)
-df2 = None
-test_output_annot = pd.concat([df1,df2])
-
+train_output_annot = creatingInfoData(train_annot_path)
+test_output_annot = creatingInfoData(test_annot_path)
 print("-------------------------------")
-print("Transforming.....")
+print("Converting XML files to dataframe.....")
 print("-------------------------------")
 train_output_annot.to_pickle(os.path.join(outputannot,'v{}_train.pkl'.format(params['ingest']['dcount'])))
 test_output_annot.to_pickle(os.path.join(outputannot,'v{}_test.pkl'.format(params['ingest']['dcount'])))

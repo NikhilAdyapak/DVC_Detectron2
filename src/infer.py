@@ -38,7 +38,6 @@ from tqdm import tqdm
 
 from helper.xml_to_df import *
 from helper.custom_evaluate import *
-from helper.txt_to_df import *
 
 if len(sys.argv) != 5:
     sys.stderr.write('Arguments error. Usage:\n')
@@ -60,16 +59,13 @@ def custom_dataset_function_train():
     #   'annotations': [{'bbox': [250.0, 675.0, 23.0, 17.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 391.0, 'segmentation': [],
     #        'category_id': 0}, {'bbox': [295.0, 550.0, 21.0, 20.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 420.0, 'segmentation': [], 'category_id': 0},..
 
-    annot_path = params['train']['annot_path']
-    img_path = params['train']['img_path']
-    aug_annot_path = params['train']['aug_annot_path']
-    aug_img_path = params['train']['aug_img_path']
+    # annot_path = params['train']['annot_path']
+    # img_path = params['train']['img_path']
 
-    df1 = creatingInfoData(annot_path)
-    # df2 = aug_img_df(aug_annot_path)
-    df2 = None
-    dataframe = pd.concat([df1,df2])
-    
+    annot_path = os.path.join(base_path, params['train']['annot_path'])
+    img_path = os.path.join(base_path, params['train']['img_path'])
+
+    dataframe = creatingInfoData(annot_path)
     old_fname = os.path.join(img_path, dataframe["name"][0].split('.')[0] + ".jpg")
     annotations = []
     dataset = []
@@ -116,17 +112,10 @@ def custom_dataset_function_test():
     #   'annotations': [{'bbox': [250.0, 675.0, 23.0, 17.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 391.0, 'segmentation': [],
     #        'category_id': 0}, {'bbox': [295.0, 550.0, 21.0, 20.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 420.0, 'segmentation': [], 'category_id': 0},..
 
-    annot_path = params['test']['annot_path']
-    img_path = params['test']['img_path']
-    aug_annot_path = params['test']['aug_annot_path']
-    aug_img_path = params['test']['aug_img_path']
+    annot_path = os.path.join(base_path, params['test']['annot_path'])
+    img_path = os.path.join(base_path, params['test']['img_path'])
 
-    df1 = creatingInfoData(annot_path)
-    # df2 = aug_img_df(aug_annot_path)
-    df2 = None
-    dataframe = pd.concat([df1,df2])
-
-    print("hello",dataframe)
+    dataframe = creatingInfoData(annot_path)
     old_fname = os.path.join(img_path, dataframe["name"][0].split('.')[0] + ".jpg")
     annotations = []
     dataset = []
@@ -239,11 +228,7 @@ def custom_evaluator(cache,params,metrics):
     gt_df = creatingInfoData(annot_path)
 
     for filename in tqdm(os.listdir(annot_path)):
-        ext = filename.split(".")[1]
-        if ext == "xml":
-            img = os.path.join(img_path, filename).replace("xml","jpg")
-        else:
-            img = os.path.join(img_path, filename).replace("txt","jpg")
+        img = os.path.join(img_path, filename).replace("xml","jpg")
         img = cv2.imread(img)
         outputs = predictor(img)
         v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
