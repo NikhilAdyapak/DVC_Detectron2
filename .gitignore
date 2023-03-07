@@ -8,3 +8,5 @@ dataset/
 output/
 
 src/helper/__pycache__
+
+archive/

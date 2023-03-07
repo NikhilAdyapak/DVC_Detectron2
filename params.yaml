@@ -5,8 +5,8 @@ ingest:
   dcount: 3
 
 train:
-  img_path: archive/Train/Train/JPEGImages
-  annot_path: archive/Train/Train/Annotations
+  img_path: Train/Train/JPEGImages
+  annot_path: Train/Train/Annotations
   aug_img_path:
   aug_annot_path:
   dataset_name: karthika95_dataset_train
@@ -18,8 +18,8 @@ train:
 
 test:
   model: output/model_final.pth
-  img_path: archive/Val/Val/JPEGImages
-  annot_path: archive/Val/Val/Annotations
+  img_path: Val/Val/JPEGImages
+  annot_path: Val/Val/Annotations
   aug_img_path:
   aug_annot_path:
   dataset_name: karthika95_dataset_test
