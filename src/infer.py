@@ -228,7 +228,11 @@ def custom_evaluator(cache,params,metrics):
     gt_df = creatingInfoData(annot_path)
 
     for filename in tqdm(os.listdir(annot_path)):
-        img = os.path.join(img_path, filename).replace("xml","jpg")
+        ext = filename.split(".")[1]
+        if ext == "xml":
+            img = os.path.join(img_path, filename).replace("xml","jpg")
+        else:
+            img = os.path.join(img_path, filename).replace("txt","jpg")
         img = cv2.imread(img)
         outputs = predictor(img)
         v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
