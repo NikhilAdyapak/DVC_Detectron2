@@ -68,8 +68,7 @@ def custom_dataset_function_train():
     df1 = creatingInfoData(annot_path)
     # df2 = aug_img_df(aug_annot_path)
     df2 = None
-    # dataframe = pd.concat([df1,df2])
-    dataframe = df1
+    dataframe = pd.concat([df1,df2])
     
     old_fname = os.path.join(img_path, dataframe["name"][0].split('.')[0] + ".jpg")
     annotations = []
@@ -125,8 +124,8 @@ def custom_dataset_function_test():
     df1 = creatingInfoData(annot_path)
     # df2 = aug_img_df(aug_annot_path)
     df2 = None
-    # dataframe = pd.concat([df1,df2])
-    dataframe = df1
+    dataframe = pd.concat([df1,df2])
+
     print("hello",dataframe)
     old_fname = os.path.join(img_path, dataframe["name"][0].split('.')[0] + ".jpg")
     annotations = []

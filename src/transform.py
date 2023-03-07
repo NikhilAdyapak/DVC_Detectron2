@@ -125,14 +125,12 @@ test_aug_path = params['test']['aug_annot_path']
 df1 = creatingInfoData(train_annot_path)
 # df2 = aug_img_df(train_aug_path)
 df2 = None
-# train_output_annot = pd.concat([df1,df2])
-train_output_annot = df1
+train_output_annot = pd.concat([df1,df2])
 
 df1 = creatingInfoData(test_annot_path)
 # df2 = aug_img_df(test_aug_path)
 df2 = None
-# test_output_annot = pd.concat([df1,df2])
-test_output_annot = df1
+test_output_annot = pd.concat([df1,df2])
 
 print("-------------------------------")
 print("Transforming.....")
