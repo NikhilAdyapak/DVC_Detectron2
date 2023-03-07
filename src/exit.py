@@ -1,6 +1,8 @@
 import os,sys
 from distutils.dir_util import copy_tree
 import yaml
+import warnings as wr
+wr.filterwarnings("ignore")
 
 if len(sys.argv) != 4:
     sys.stderr.write('Arguments error. Usage:\n')
