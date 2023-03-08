@@ -1,6 +1,6 @@
 stages:
   ingest:
-    cmd: python3 src/ingest.py
+    cmd: python3 src/ingest.py data/prepared
     deps:
     - src/ingest.py
     params:
@@ -8,73 +8,145 @@ stages:
     outs:
     - data/prepared
 
-  augment:
-    cmd: python3 src/augment.py data/prepared data/augmented
+  split:
+    cmd: python3 src/split.py data/prepared data/split
     deps:
-    - src/augment.py
+    - src/split.py
     - data/prepared
     params:
     - ingest.dcount
     outs:
-    - data/augmented
+    - data/split
+
+  augment:
+    cmd: python3 src/augment.py data/split data/augment
+    deps:
+    - src/augment.py
+    - data/split
+    params:
+    - ingest.dcount
+    outs:
+    - data/augment
 
   transform:
-    cmd: python3 src/transform.py data/prepared data/augmented data/transformed
+    cmd: python3 src/transform.py data/augment data/split data/transform
     deps:
     - src/transform.py
-    - data/augmented
-    params:
-    - ingest.dcount
-    outs:
-    - data/transformed
-
-  split:
-    cmd: python3 src/split.py data/prepared data/transformed data/split
-    deps:
-    - src/split.py
-    - data/transformed
-    params:
-    - ingest.dcount
-    outs:
+    - data/augment
     - data/split
+    params:
+    - ingest.dcount
+    outs:
+    - data/transform
   
   infer:
-    cmd: python3 src/infer.py data/prepared data/transformed data/infer data/store
+    cmd: python3 src/infer.py data/transform data/infer
     deps:
     - src/infer.py
-    - data/split
+    - data/transform
     params:
     - ingest.dcount
     outs:
     - data/infer
 
   train:
-    cmd: python3 src/train.py data/prepared data/transformed data/train data/predict
+    cmd: python3 src/train.py data/transform data/store data/train
     deps:
-    - src/infer.py
-    - data/split
+    - src/train.py
+    - data/transform
     params:
     - ingest.dcount
     outs:
     - data/train
 
   predict:
-    cmd: python3 src/predict.py data/train data/predict data/store
+    cmd: python3 src/predict.py data/train data/transform data/predict
     deps:
-    - data/train
     - src/predict.py
+    - data/train
+    - data/transform
     params:
     - ingest.dcount
     outs:
     - data/predict
 
-  exit:
-    cmd: python3 src/exit.py data/infer data/predict data/store
+  compare:
+    cmd: python3 src/compare.py data/infer data/predict data/store
     deps:
+    - src/compare.py
     - data/infer
     - data/predict
-    - src/exit.py
     params:
     - ingest.dcount
     outs:
     - data/store
+
+  exit:
+    cmd: python3 src/exit.py data/store
+    deps:
+    - data/exit
+    - data/store
+    params:
+    - ingest.dcount
+
+#   infer:
+#     cmd: python3 src/infer.py data/prepared data/transformed
+#     deps:
+#     - src/infer.py
+#     - data/split
+#     params:
+#     - ingest.dcount
+#     outs:
+#     - data/infer
+
+#   train:
+#     cmd: python3 src/train.py data/split data/train
+#     deps:
+#     - src/infer.py
+#     - data/split
+#     params:
+#     - ingest.dcount
+#     outs:
+#     - data/train
+
+#   predict:
+#     cmd: python3 src/predict.py data/train data/predict data/store
+#     deps:
+#     - data/train
+#     - src/predict.py
+#     params:
+#     - ingest.dcount
+#     outs:
+#     - data/predict
+
+#   compare:
+#     cmd: python3 src/compare.py data/infer data/split data/store
+#     deps:
+#     - src/compare.py
+#     - data/predict
+#     - data/infer
+#     params:
+#     - ingest.dcount
+#     outs:
+#     - data/results
+  
+#   retrain:
+#     cmd: python3 src/retrain.py data/results data/retrained data/predict data/store
+#     deps:
+#     - src/retrain.py
+#     - data/results
+#     - data/predict
+#     params:
+#     - ingest.dcount
+#     outs:
+#     - data/retrain
+
+#   exit:
+#     cmd: python3 src/exit.py data/compare data/store
+#     deps:
+#     - src/exit.py
+#     - data/results
+#     params:
+#     - ingest.dcount
+#     outs:
+#     - data/store
