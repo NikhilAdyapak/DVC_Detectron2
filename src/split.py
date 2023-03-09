@@ -4,18 +4,60 @@ import yaml
 import pickle
 from tqdm import tqdm
 import cv2
+import fnmatch
+import math
 
-if len(sys.argv) != 4:
+import splitfolders
+
+
+if len(sys.argv) != 3:
     sys.stderr.write('Arguments error. Usage:\n')
     sys.stderr.write(
-        '\tpython3 src/split.py data/prepared data/transformed data/split\n'
+        '\tpython3 src/split.py data/prepared data/split\n'
     )
     sys.exit(1)
 
-params = yaml.safe_load(open('params.yaml'))
-print("-------------------------------")
-print("Splitting.....")
-print("-------------------------------")
 
-outputsplit = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
-os.makedirs(outputsplit, exist_ok = True)
+
+
+
+
+def numberOfFiles(params):
+    dir_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}","Annotations")
+    count = len(fnmatch.filter(os.listdir(dir_path), '*.*'))
+    files = os.listdir(dir_path)
+    print(files)
+    return count
+
+def makeBatches(path):
+    batch_list = ['Infer','Batch1','Batch2','Batch3']
+    for li in batch_list:
+        parent_path = os.path.join(path,li)
+        split_image_path = os.path.join(parent_path,"Annotations")
+        split_annot_path = os.path.join(parent_path,"Images")
+        os.makedirs(split_image_path,exist_ok=True)
+        os.makedirs(split_annot_path,exist_ok=True)
+    return
+
+def split():
+    return 
+
+
+def main():
+    params = yaml.safe_load(open('params.yaml'))
+    outputsplit = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
+    #makeBatches(outputsplit)
+    count = numberOfFiles(params)
+    infer_batch = math.floor(params['split']['infer'] * count)
+    train_batch = math.floor(params['split']['train'] * count)
+    print(infer_batch)
+    print(train_batch)
+    os.makedirs(outputsplit, exist_ok = True)
+    print("-------------------------------")
+    print("Splitting.....")
+    print("-------------------------------")
+    splitfolders.ratio('data/prepared/v3', output=outputsplit, ratio=(.9, .1), group_prefix=None, move=False)
+
+
+if __name__ == '__main__':
+    main()
