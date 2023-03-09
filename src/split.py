@@ -18,16 +18,13 @@ if len(sys.argv) != 3:
     sys.exit(1)
 
 
-
-
-
-
 def numberOfFiles(params):
     dir_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}","Annotations")
     count = len(fnmatch.filter(os.listdir(dir_path), '*.*'))
     files = os.listdir(dir_path)
     print(files)
     return count
+
 
 def makeBatches(path):
     batch_list = ['Infer','Batch1','Batch2','Batch3']
@@ -39,8 +36,9 @@ def makeBatches(path):
         os.makedirs(split_annot_path,exist_ok=True)
     return
 
+
 def split():
-    return 
+    return
 
 
 def main():
