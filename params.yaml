@@ -8,17 +8,7 @@ dataset:
 ingest:
   dcount: 3
 
-
-# output:
-#   modelsave_path: output/model.h5
-#   loss_graph: output/lossplot.png
-#   test_split: output/test.txt
-
-
 parameters:
-  # initial_lr: 1e-4 
-  # epochs: 100
-  # batch_size: 64
   config_file: COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml
   NUM_WORKERS: 2
   IMS_PER_BATCH: 2
