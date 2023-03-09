@@ -1,5 +1,5 @@
 dataset:
-  path:  # Put path to dataset here
+  path: archive # Put path to dataset here
 
 # Datatset
 # --Images

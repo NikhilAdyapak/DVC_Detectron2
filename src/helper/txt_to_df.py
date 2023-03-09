@@ -5,15 +5,15 @@ def aug_img_df(Annotpath):
     for files in sorted(glob.glob(str(Annotpath+'/*.txt*'))):
         with open(files, "r") as f:
             bbox = (f.read()).split('\n')
-        for data in bbox:
+        for data in bbox[0:-1]:
             data = data.split()
             value = (
-                int(data[0]),
-                int(data[1]),
-                int(data[2]),
-                int(data[3]),
-                files,
-                int(data[4]),
+                float(data[0]),
+                float(data[1]),
+                float(data[2]),
+                float(data[3]),
+                files.split(".")[0],
+                data[4],
             )
             aug_list.append(value)
     column_name = ['xmin', 'ymin', 'xmax', 'ymax', 'name', 'label']

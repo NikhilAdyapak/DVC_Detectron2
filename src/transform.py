@@ -5,12 +5,15 @@ import pandas as pd
 import glob
 import xml.etree.ElementTree as ET
 
+# from helper.xml_to_df import *
+from helper.txt_to_df import *
+
 params = yaml.safe_load(open('params.yaml'))
 
 if len(sys.argv) != 4:
     sys.stderr.write('Arguments error. Usage:\n')
     sys.stderr.write(
-        '\tpython3 src/transform.py data/prepared data/augmented data/transformed\n'
+        '\tpython3 src/transform.py data/augmented data/split data/transform\n'
     )
     sys.exit(1)
 
@@ -21,12 +24,13 @@ def creatingInfoData(Annotpath):
         tree = ET.parse(xml_file)
         root = tree.getroot()
         for member in root.findall('object'):
+            file_name = xml_file.split('/')[-1][0:-4]
             value = (
                      int(member[4][0].text),
                      int(member[4][1].text),
                      int(member[4][2].text),
                      int(member[4][3].text),
-                     root.find('filename').text,
+                     os.path.join(Annotpath,file_name),
                      member[0].text,
                      )
             xml_list.append(value)
@@ -35,39 +39,30 @@ def creatingInfoData(Annotpath):
     return xml_df
 
 
-def aug_img_df(Annotpath):
-    aug_list = []
-    for files in sorted(glob.glob(str(Annotpath+'/*.txt*'))):
-        with open(files, "r") as f:
-            bbox = (f.read()).split('\n')
-        for data in bbox:
-            data = data.split()
-            value = (
-                int(data[0]),
-                int(data[1]),
-                int(data[2]),
-                int(data[3]),
-                files,
-                int(data[4]),
-            )
-            aug_list.append(value)
-    column_name = ['xmin', 'ymin', 'xmax', 'ymax', 'name', 'label']
-    aug_df = pd.DataFrame(aug_list, columns = column_name)
-    return aug_df
-
 
 if __name__ == "__main__":
 
     outputannot = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
     os.makedirs(outputannot, exist_ok = True)
 
-    train_annot_path = params['train']['annot_path']
-    test_annot_path = params['test']['annot_path']
+    annot_path_train = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}","train","Annotations")
 
-    train_output_annot = creatingInfoData(train_annot_path)
-    test_output_annot = creatingInfoData(test_annot_path)
+    annot_path_aug = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}","Annotations")
+
+    annot_path_val = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}","val","Annotations")
+
+    train_output_annot = creatingInfoData(annot_path_train)
+    aug_output_annot = aug_img_df(annot_path_aug)
+
+    df_train = pd.concat([train_output_annot,aug_output_annot])
+    print(df_train)
+    df_val = creatingInfoData(annot_path_val)
+
     print("-------------------------------")
     print("Tranforming.....")
     print("-------------------------------")
-    train_output_annot.to_pickle(os.path.join(outputannot,'v{}_train.pkl'.format(params['ingest']['dcount'])))
-    test_output_annot.to_pickle(os.path.join(outputannot,'v{}_test.pkl'.format(params['ingest']['dcount'])))
+
+    df_train.to_pickle(os.path.join(outputannot,'v{}_train.pkl'.format(params['ingest']['dcount'])))
+    df_val.to_pickle(os.path.join(outputannot,'v{}_val.pkl'.format(params['ingest']['dcount'])))
+
+    # df = pd.read_pickle(file_name)

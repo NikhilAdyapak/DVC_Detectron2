@@ -12,6 +12,7 @@ import albumentations as A
 from helper.xml_to_df import creatingInfoData
 from tqdm import tqdm
 import progressbar
+from progress.bar import Bar
 
 if len(sys.argv) != 3:
     sys.stderr.write('Arguments error. Usage:\n')
@@ -19,7 +20,6 @@ if len(sys.argv) != 3:
         '\tpython3 src/augment.py data/split data/augmented\n'
     )
     sys.exit(1)
-
 
 #Global
 count = 0
@@ -29,19 +29,24 @@ count = 0
 def augmentation(image_path,annot_path,data,output_image_path,output_annot_path):
     bboxes = []
     prev_image = data['name'][0]
+    print(prev_image)
+    bar = Bar('Processing', max=len(data))
     #bar = progressbar.ProgressBar(maxval = len(data)).start()
-    for index,row in tqdm(data.iterrows(),desc="Augmenting....",ascii=False,ncols=75):
+    for index,row in data.iterrows():
         row_image = row['name']
         if row_image == prev_image:
 
             #To store bboxes of respective image
             boxes = [row['xmin'],row['ymin'],row['xmax'] - row['xmin'],row['ymax'] - row['ymin'],row['label']]
             bboxes.append(boxes)
+            
         else:
             #CHECK FOR VALUE ERRORS 
             try:
+                print(prev_image)
                 aug_image, aug_boxes = transform(image_path,prev_image,bboxes)
                 save_images(aug_image,aug_boxes,output_image_path,output_annot_path)
+                
                 #bar.update(index)
             except ValueError:
                 pass 
@@ -49,6 +54,8 @@ def augmentation(image_path,annot_path,data,output_image_path,output_annot_path)
             boxes = [row['xmin'],row['ymin'],row['xmax'] - row['xmin'],row['ymax'] - row['ymin'],row['label']]
             bboxes.append(boxes)
         prev_image = row_image
+        bar.next()
+    bar.finish()
     return 
 
 
@@ -68,8 +75,9 @@ def transform(img_path,image_name,bboxes):
     A.RandomBrightnessContrast(p=0.2),
     A.ShiftScaleRotate(p=0.5),
     A.RandomSnow(p=0.2),
-    A.RandomFog(),
-    A.RGBShift(r_shift_limit=30, g_shift_limit=30, b_shift_limit=30, p=0.3)
+    # A.RandomFog(),
+    # A.RGBShift(r_shift_limit=30, g_shift_limit=30, b_shift_limit=30, p=0.3
+    #            )
 ], bbox_params=A.BboxParams(format='coco'))
     
 
@@ -77,7 +85,6 @@ def transform(img_path,image_name,bboxes):
     transformed_image = transformed['image']
     transformed_bboxes = transformed['bboxes']
     return transformed_image, transformed_bboxes
-
 
 #DRAW BOUNDING BOXES TO CHECK AND SAVE THE BOXES, LABELS IN TXT FORMAT
 def save_images(aug_image,aug_boxes,output_image,output_annot):
@@ -95,6 +102,7 @@ def save_images(aug_image,aug_boxes,output_image,output_annot):
     count = count +1
     aug.save(output_image_path)
     return 
+
 
 
 def main():
