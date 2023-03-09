@@ -3,24 +3,26 @@ from distutils.dir_util import copy_tree
 import yaml
 
 
-if len(sys.argv) != 2:
-    sys.stderr.write('Arguments error. Usage:\n')
-    sys.stderr.write(
-        '\tpython3 src/ingest.py data/prepared\n'
-    )
-    sys.exit(1)
 
-params = yaml.safe_load(open('params.yaml'))
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        sys.stderr.write('Arguments error. Usage:\n')
+        sys.stderr.write(
+            '\tpython3 src/ingest.py data/prepared\n'
+        )
+        sys.exit(1)
+
+    params = yaml.safe_load(open('params.yaml'))
 
 
-data_path = os.path.join(sys.argv[1], f"v{params['ingest']['dcount']}")
-print(data_path)
+    data_path = os.path.join(sys.argv[1], f"v{params['ingest']['dcount']}")
+    print(data_path)
 
-input_dir = params["dataset"]["path"]
-os.makedirs(data_path, exist_ok = True)
+    input_dir = params["dataset"]["path"]
+    os.makedirs(data_path, exist_ok = True)
 
-print("-------------------------------")
-print("Ingesting.....")
-print("-------------------------------")
+    print("-------------------------------")
+    print("Ingesting.....")
+    print("-------------------------------")
 
-copy_tree(input_dir, data_path)
+    copy_tree(input_dir, data_path)
