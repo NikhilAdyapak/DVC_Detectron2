@@ -44,17 +44,18 @@ def split():
 def main():
     params = yaml.safe_load(open('params.yaml'))
     outputsplit = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
-    #makeBatches(outputsplit)
-    count = numberOfFiles(params)
-    infer_batch = math.floor(params['split']['infer'] * count)
-    train_batch = math.floor(params['split']['train'] * count)
-    print(infer_batch)
-    print(train_batch)
+
+    input_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}")
+    
+    infer_batch = params['split']['val']
+    train_batch = params['split']['train']
+    # print(infer_batch)
+    # print(train_batch)
     os.makedirs(outputsplit, exist_ok = True)
     print("-------------------------------")
     print("Splitting.....")
     print("-------------------------------")
-    splitfolders.ratio('data/prepared/v3', output=outputsplit, ratio=(.9, .1), group_prefix=None, move=False)
+    splitfolders.ratio(input_path, output = outputsplit, ratio = (train_batch, infer_batch), group_prefix = None, move = False)
 
 
 if __name__ == '__main__':
