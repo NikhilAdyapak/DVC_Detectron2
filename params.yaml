@@ -8,6 +8,10 @@ dataset:
 ingest:
   dcount: 3
 
+split:
+  infer : 0.1
+  train : 0.3
+
 parameters:
   config_file: COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml
   NUM_WORKERS: 2
