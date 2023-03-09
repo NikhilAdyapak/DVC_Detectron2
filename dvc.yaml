@@ -19,20 +19,20 @@ stages:
     - data/split
 
   augment:
-    cmd: python3 src/augment.py data/split data/augment
+    cmd: python3 src/augment.py data/split data/augmented
     deps:
     - src/augment.py
     - data/split
     params:
     - ingest.dcount
     outs:
-    - data/augment
+    - data/augmented
 
   transform:
-    cmd: python3 src/transform.py data/augment data/split data/transform
+    cmd: python3 src/transform.py data/augmented data/split data/transform
     deps:
     - src/transform.py
-    - data/augment
+    - data/augmented
     - data/split
     params:
     - ingest.dcount
