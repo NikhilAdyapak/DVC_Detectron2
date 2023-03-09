@@ -20,6 +20,7 @@ if len(sys.argv) != 3:
     )
     sys.exit(1)
 
+
 #Global
 count = 0
 
@@ -77,6 +78,7 @@ def transform(img_path,image_name,bboxes):
     transformed_bboxes = transformed['bboxes']
     return transformed_image, transformed_bboxes
 
+
 #DRAW BOUNDING BOXES TO CHECK AND SAVE THE BOXES, LABELS IN TXT FORMAT
 def save_images(aug_image,aug_boxes,output_image,output_annot):
     global count
@@ -93,7 +95,6 @@ def save_images(aug_image,aug_boxes,output_image,output_annot):
     count = count +1
     aug.save(output_image_path)
     return 
-
 
 
 def main():
