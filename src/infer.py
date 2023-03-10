@@ -38,6 +38,7 @@ from tqdm import tqdm
 
 from helper.xml_to_df import *
 from helper.custom_evaluate import *
+from detectron2.data.datasets import register_coco_instances
 
 if len(sys.argv) != 3:
     sys.stderr.write('Arguments error. Usage:\n')
@@ -54,102 +55,6 @@ os.makedirs(outputinfer, exist_ok = True)
 base_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}")
 
 
-def custom_dataset_function_train():
-    # file_name, height, width, image_id
-    #[{'file_name': '/home/samjith/0000180.jpg', 'height': 788, 'width': 1400, 'image_id': 1, 
-    #   'annotations': [{'bbox': [250.0, 675.0, 23.0, 17.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 391.0, 'segmentation': [],
-    #        'category_id': 0}, {'bbox': [295.0, 550.0, 21.0, 20.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 420.0, 'segmentation': [], 'category_id': 0},..
-
-    dataframe = pd.read_pickle(os.path.join(base_path, f"v{params['ingest']['dcount']}" + "_test.pkl"))
-    
-    old_fname = (dataframe["name"][0]).replace("Annotations","Images") + ".jpg"
-    annotations = []
-    dataset = []
-    for index,row in dataframe.iterrows():
-        fname = row["name"].replace("Annotations","Images") + ".jpg"
-        xmin = row["xmin"]
-        ymin = row["ymin"]
-        xmax = row["xmax"]
-        ymax = row["ymax"]
-
-        if old_fname != fname:
-            img = cv2.imread(old_fname)
-            dataset.append(
-                        {"file_name":old_fname , 
-                        "height":img.shape[0], 
-                        "width":img.shape[1],
-                        "image_id":re.findall(r'\d+', old_fname)[0],
-                        "annotations":annotations})
-            annotations = []
-
-        annotations.append(
-            {"bbox":[xmin,ymin,xmax,ymax],
-            'bbox_mode': 0, 
-            'area': (xmax - xmin) * (ymax - ymin), 
-            'segmentation': [],
-            'category_id':0})
-     
-        old_fname = fname
-
-    img = cv2.imread(old_fname)
-    dataset.append(
-                        {"file_name":old_fname , 
-                        "height":img.shape[0], 
-                        "width":img.shape[1],
-                        "image_id":re.findall(r'\d+', old_fname)[0],
-                        "annotations":annotations})
-
-    return dataset
-
-
-def custom_dataset_function_val():
-    # file_name, height, width, image_id
-    #[{'file_name': '/home/samjith/0000180.jpg', 'height': 788, 'width': 1400, 'image_id': 1, 
-    #   'annotations': [{'bbox': [250.0, 675.0, 23.0, 17.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 391.0, 'segmentation': [],
-    #        'category_id': 0}, {'bbox': [295.0, 550.0, 21.0, 20.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 420.0, 'segmentation': [], 'category_id': 0},..
-
-    dataframe = pd.read_pickle(os.path.join(base_path, f"v{params['ingest']['dcount']}" + "_val.pkl"))
-    
-    old_fname = (dataframe["name"][0]).replace("Annotations","Images") + ".jpg"
-    annotations = []
-    dataset = []
-    for index,row in dataframe.iterrows():
-        fname = row["name"].replace("Annotations","Images") + ".jpg"
-        xmin = row["xmin"]
-        ymin = row["ymin"]
-        xmax = row["xmax"]
-        ymax = row["ymax"]
-
-        if old_fname != fname:
-            img = cv2.imread(old_fname)
-            dataset.append(
-                        {"file_name":old_fname , 
-                        "height":img.shape[0], 
-                        "width":img.shape[1],
-                        "image_id":re.findall(r'\d+', old_fname)[0],
-                        "annotations":annotations})
-            annotations = []
-
-        annotations.append(
-            {"bbox":[xmin,ymin,xmax,ymax],
-            'bbox_mode': 0, 
-            'area': (xmax - xmin) * (ymax - ymin), 
-            'segmentation': [],
-            'category_id':0})
-     
-        old_fname = fname
-
-    img = cv2.imread(old_fname)
-    dataset.append(
-                        {"file_name":old_fname , 
-                        "height":img.shape[0], 
-                        "width":img.shape[1],
-                        "image_id":re.findall(r'\d+', old_fname)[0],
-                        "annotations":annotations})
-
-    return dataset
-
-
 def custom_detectron(cache,params,metrics):
     # torch.cuda.empty_cache()
 
@@ -159,47 +64,46 @@ def custom_detectron(cache,params,metrics):
     dataset_name_val = cache["val"]
     results = cache["results"]
 
-    dataset_name_train = params['dataset']['name'] + "train"
-    dataset_name_val = params['dataset']['name'] + "val"
+    # dataset_name_train = params['dataset']['name'] + "train"
+    # dataset_name_val = params['dataset']['name'] + "val"
+    dataset_name_train = "my_dataset_train"
+    dataset_name_val = "my_dataset_val"
 
-    DatasetCatalog.register(dataset_name_train, custom_dataset_function_train)
-    MetadataCatalog.get(dataset_name_train).set(thing_classes = ["person"])
-    
-    cfg = get_cfg()
-    cfg.merge_from_file(model_zoo.get_config_file(params['parameters']['config_file']))
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_val = 0.7 
-    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(params['parameters']['config_file'])
-    predictor = DefaultPredictor(cfg)
-    DatasetCatalog.register(dataset_name_val, custom_dataset_function_val)
-    MetadataCatalog.get(dataset_name_val).set(thing_classes = ["person"])
+    register_coco_instances("my_dataset_train", {}, "/home/yln1kor/Dataset/karthika95/Train/_annotations.coco.json", "/home/yln1kor/Dataset/karthika95/Train")
+    register_coco_instances("my_dataset_val", {}, "/home/yln1kor/Dataset/karthika95/Val/_annotations.coco.json", "/home/yln1kor/Dataset/karthika95/Val")
 
-    my_dataset_val_metadata = MetadataCatalog.get(dataset_name_val).set(thing_classes = ["person"])
-    # from detectron2.utils.visualizer import ColorMode
-    dataset_dicts = DatasetCatalog.get(dataset_name_val)
-    for d in random.sample(dataset_dicts, 5):    
-        print(d["file_name"])
+    my_dataset_train_metadata = MetadataCatalog.get("my_dataset_train")
+    dataset_dicts = DatasetCatalog.get("my_dataset_train")
+
+
+    for d in random.sample(dataset_dicts, 3):
         img = cv2.imread(d["file_name"])
-        outputs = predictor(img)
-        v = Visualizer(img[:, :, ::-1], metadata = my_dataset_val_metadata, scale = 0.5)
-        # vis = visualizer.draw_dataset_dict(d)
-        out = v.draw_instance_predictions(outputs["instances"][outputs['instances'].pred_classes == 0].to("cpu"))
-        # cv2_imshow(vis.get_image()[:, :, ::-1])
-        cv2.imshow("output",out.get_image()[:, :, ::-1])
+        visualizer = Visualizer(img[:, :, ::-1], metadata=my_dataset_train_metadata, scale=0.5)
+        vis = visualizer.draw_dataset_dict(d)
+        cv2.imshow("out",vis.get_image()[:, :, ::-1])
         cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 
+    cfg = get_cfg()
+    cfg.merge_from_file(model_zoo.get_config_file(params['parameters']['config_file']))
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7 
+    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(params['parameters']['config_file'])
+    predictor = DefaultPredictor(cfg)
     # # Detectron Evaluator
     evaluator = COCOEvaluator(dataset_name_val, cfg, False, output_dir = params["output"]["base_dir"])
     val_loader = build_detection_test_loader(cfg, dataset_name_val)
-    eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
+    try:
+        eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
+    except AssertionError:
+        print("AssertionError Occurred and Handled")
 
-    d1 = next(iter(eval_results.items()))
-    d2 = next(iter(eval_results.values()))
+    # d1 = next(iter(eval_results.items()))
+    # d2 = next(iter(eval_results.values()))
 
-    d = {'AP':d2["AP"],'AP50':d2["AP50"],'AP75':d2["AP75"],'APs':d2['APs']}
-    s1 = json.dumps(d)
-    results = json.loads(s1)
+    # d = {'AP':d2["AP"],'AP50':d2["AP50"],'AP75':d2["AP75"],'APs':d2['APs']}
+    # s1 = json.dumps(d)
+    # results = json.loads(s1)
 
     cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"val":dataset_name_val,"results":results}
     (cache,metrics) = custom_evaluator(cache,params,metrics)
@@ -232,27 +136,27 @@ def custom_evaluator(cache,params,metrics):
         img = cv2.imread(img)
         outputs = predictor(img)
         v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
-        boxes = v._convert_boxes(outputs["instances"][outputs["instances"].pred_classes == 0].pred_boxes.to('cpu'))
+        boxes = v._convert_boxes(outputs["instances"].pred_boxes.to('cpu'))
         # print(boxes,type(boxes))
         gt_df_sub = gt_df[gt_df["name"] == filename]
         gt_boxes = []
         for index, row in gt_df_sub.iterrows():
             gt_boxes.append([row["xmin"],row["ymin"],row["xmax"],row["ymax"]])
         # print(gt_boxes, type(gt_boxes))
-        out = v.draw_instance_predictions(outputs["instances"][outputs['instances'].pred_classes == 0].to("cpu"))
+        out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
 
         for box in boxes:
             metrics = iou_mapping(box,gt_boxes,metrics)
 
-    for index, row in dataframe.iterrows():
-        annot_path = row["name"]
-        img = annot_path.replace("Annotations","Images") + ".jpg"
-        img = cv2.imread(img)
-        outputs = predictor(img)
-        v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
-        boxes = v._convert_boxes(outputs["instances"][outputs["instances"].pred_classes == 0].pred_boxes.to('cpu'))
-        # print(boxes,type(boxes))
-        gt_df_sub = dataframe
+    # for index, row in dataframe.iterrows():
+    #     annot_path = row["name"]
+    #     img = annot_path.replace("Annotations","Images") + ".jpg"
+    #     img = cv2.imread(img)
+    #     outputs = predictor(img)
+    #     v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
+    #     boxes = v._convert_boxes(outputs["instances"].pred_boxes.to('cpu'))
+    #     # print(boxes,type(boxes))
+    #     gt_df_sub = dataframe
 
     metrics = evaluate(metrics)
     cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"val":dataset_name_val,"results":results}
