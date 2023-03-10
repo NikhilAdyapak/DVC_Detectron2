@@ -11,8 +11,8 @@ stages:
         ingest.dcount: 3
     outs:
     - path: data/prepared
-      md5: ebdb8d331d52b290e302eae41844f1a3.dir
-      size: 165199604
+      md5: abe55d8bdad6672b65112934b945e653.dir
+      size: 165196292
       nfiles: 2208
   predict:
     cmd: python3 src/predict.py data/train data/predict data/store
@@ -35,25 +35,21 @@ stages:
   transform:
     cmd: python3 src/transform.py data/augmented data/split data/transform
     deps:
-    - path: data/augmented
-      md5: a78e9f7aea074d65d83c653997e3801b.dir
-      size: 76696097
-      nfiles: 1982
     - path: data/split
-      md5: 04ab9239865757791297b5ef272ae14c.dir
-      size: 165199604
+      md5: 54eb0133ea205bae31bd93ed95b82294.dir
+      size: 165196292
       nfiles: 2208
     - path: src/transform.py
-      md5: f19ba16fb1158386e5b75d099f04a09f
-      size: 2243
+      md5: 98db9b23db48e74395dcdbf03193bf42
+      size: 3905
     params:
       params.yaml:
         ingest.dcount: 3
     outs:
     - path: data/transform
-      md5: 33153ed40c2d4d8ac79465c3d0902327.dir
-      size: 414904
-      nfiles: 2
+      md5: ac8d4d250595ad208e2e8914b40f516a.dir
+      size: 658747
+      nfiles: 7
   evaluate:
     cmd: python3 src/evaluate.py data/prepared data/transformed data/predictions data/evaluated
       data/store
@@ -100,8 +96,8 @@ stages:
     cmd: python3 src/split.py data/prepared data/split
     deps:
     - path: data/prepared
-      md5: ebdb8d331d52b290e302eae41844f1a3.dir
-      size: 165199604
+      md5: abe55d8bdad6672b65112934b945e653.dir
+      size: 165196292
       nfiles: 2208
     - path: src/split.py
       md5: 18381f39622c0a4ae8c9efb6af1acbdb
@@ -111,8 +107,8 @@ stages:
         ingest.dcount: 3
     outs:
     - path: data/split
-      md5: 04ab9239865757791297b5ef272ae14c.dir
-      size: 165199604
+      md5: 54eb0133ea205bae31bd93ed95b82294.dir
+      size: 165196292
       nfiles: 2208
   train:
     cmd: python3 src/train.py data/prepared data/transformed data/train data/predict

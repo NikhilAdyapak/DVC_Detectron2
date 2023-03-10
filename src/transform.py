@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 
 # from helper.xml_to_df import *
 from helper.txt_to_df import *
+from helper.voc2coco import *
 
 params = yaml.safe_load(open('params.yaml'))
 
@@ -47,7 +48,7 @@ if __name__ == "__main__":
 
     annot_path_train = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}","train","Annotations")
 
-    annot_path_aug = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}","Annotations")
+    # annot_path_aug = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}","Annotations")
 
     annot_path_val = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}","val","Annotations")
 
@@ -64,5 +65,39 @@ if __name__ == "__main__":
 
     df_train.to_pickle(os.path.join(outputannot,'v{}_train.pkl'.format(params['ingest']['dcount'])))
     df_val.to_pickle(os.path.join(outputannot,'v{}_val.pkl'.format(params['ingest']['dcount'])))
+
+    for root,subdir,files in os.walk(annot_path_train):
+        xml_list = files
+
+    with open(os.path.join(outputannot,'train_ids.txt'), 'w') as fp:
+        for item in xml_list:
+            fp.write("%s\n" % item)
+        print('Done')
+    
+    labels = ["person","person-like"]
+    with open(os.path.join(outputannot,'labels.txt'), 'w') as fp:
+        for item in labels:
+            fp.write("%s\n" % item)
+        print('Done')
+
+
+    for root,subdir,files in os.walk(annot_path_val):
+        xml_list = files
+
+    with open(os.path.join(outputannot,'val_ids.txt'), 'w') as fp:
+        for item in xml_list:
+            fp.write("%s\n" % item)
+        print('Done')
+
+    cmd_train = "python3 src/helper/voc2coco.py --ann_dir " + annot_path_train + " --ann_ids " + os.path.join(outputannot,'train_ids.txt') + " --labels "+ os.path.join(outputannot,'labels.txt') + " --output " + os.path.join(outputannot,"_annotations_train.coco.json")
+    cmd_val = "python3 src/helper/voc2coco.py --ann_dir " + annot_path_val + " --ann_ids " + os.path.join(outputannot,'val_ids.txt') + " --labels "+ os.path.join(outputannot,'labels.txt') + " --output " + os.path.join(outputannot,"_annotations_valcoco.json")
+
+    os.system(cmd_train)
+    os.system(cmd_val)
+    print("Yaaay")
+    # os.system(cmd_test)
+
+    # register_coco_instances("my_dataset_train", {}, "/home/yln1kor/Dataset/karthika95/Train/_annotations.coco.json", "/home/yln1kor/Dataset/karthika95/Train")
+    # register_coco_instances("my_dataset_test", {}, "/home/yln1kor/Dataset/karthika95/Val/_annotations.coco.json", "/home/yln1kor/Dataset/karthika95/Val")
 
     # df = pd.read_pickle(file_name)

@@ -39,55 +39,55 @@ stages:
     outs:
     - data/transform
   
-  infer:
-    cmd: python3 src/infer.py data/transform data/infer
-    deps:
-    - src/infer.py
-    - data/transform
-    params:
-    - ingest.dcount
-    outs:
-    - data/infer
+  # infer:
+  #   cmd: python3 src/infer.py data/transform data/infer
+  #   deps:
+  #   - src/infer.py
+  #   - data/transform
+  #   params:
+  #   - ingest.dcount
+  #   outs:
+  #   - data/infer
 
-  train:
-    cmd: python3 src/train.py data/transform data/train
-    deps:
-    - src/train.py
-    - data/transform
-    params:
-    - ingest.dcount
-    outs:
-    - data/train
+  # train:
+  #   cmd: python3 src/train.py data/transform data/train
+  #   deps:
+  #   - src/train.py
+  #   - data/transform
+  #   params:
+  #   - ingest.dcount
+  #   outs:
+  #   - data/train
 
-  predict:
-    cmd: python3 src/predict.py data/train data/transform data/predict
-    deps:
-    - src/predict.py
-    - data/train
-    - data/transform
-    params:
-    - ingest.dcount
-    outs:
-    - data/predict
+  # predict:
+  #   cmd: python3 src/predict.py data/train data/transform data/predict
+  #   deps:
+  #   - src/predict.py
+  #   - data/train
+  #   - data/transform
+  #   params:
+  #   - ingest.dcount
+  #   outs:
+  #   - data/predict
 
-  compare:
-    cmd: python3 src/compare.py data/infer data/predict data/store
-    deps:
-    - src/compare.py
-    - data/infer
-    - data/predict
-    params:
-    - ingest.dcount
-    outs:
-    - data/store
+  # compare:
+  #   cmd: python3 src/compare.py data/infer data/predict data/store
+  #   deps:
+  #   - src/compare.py
+  #   - data/infer
+  #   - data/predict
+  #   params:
+  #   - ingest.dcount
+  #   outs:
+  #   - data/store
 
-  exit:
-    cmd: python3 src/exit.py data/store
-    deps:
-    - data/exit
-    - data/store
-    params:
-    - ingest.dcount
+  # exit:
+  #   cmd: python3 src/exit.py data/store
+  #   deps:
+  #   - data/exit
+  #   - data/store
+  #   params:
+  #   - ingest.dcount
 
 #   infer:
 #     cmd: python3 src/infer.py data/prepared data/transformed
