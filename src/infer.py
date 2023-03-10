@@ -39,15 +39,16 @@ from tqdm import tqdm
 from helper.xml_to_df import *
 from helper.custom_evaluate import *
 
-if len(sys.argv) != 5:
+if len(sys.argv) != 3:
     sys.stderr.write('Arguments error. Usage:\n')
     sys.stderr.write(
-        '\tpython3 src/infer.py data/prepared data/transformed data/infer data/store\n'
+        '\tpython3 src/infer.py data/transform data/infer\n'
     )
     sys.exit(1)
 
 params = yaml.safe_load(open('params.yaml'))
-outputinfer = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
+
+outputinfer = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
 os.makedirs(outputinfer, exist_ok = True)
 
 base_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}")
@@ -59,18 +60,13 @@ def custom_dataset_function_train():
     #   'annotations': [{'bbox': [250.0, 675.0, 23.0, 17.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 391.0, 'segmentation': [],
     #        'category_id': 0}, {'bbox': [295.0, 550.0, 21.0, 20.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 420.0, 'segmentation': [], 'category_id': 0},..
 
-    # annot_path = params['train']['annot_path']
-    # img_path = params['train']['img_path']
-
-    annot_path = os.path.join(base_path, params['train']['annot_path'])
-    img_path = os.path.join(base_path, params['train']['img_path'])
-
-    dataframe = creatingInfoData(annot_path)
-    old_fname = os.path.join(img_path, dataframe["name"][0].split('.')[0] + ".jpg")
+    dataframe = pd.read_pickle(os.path.join(base_path, f"v{params['ingest']['dcount']}" + "_test.pkl"))
+    
+    old_fname = (dataframe["name"][0]).replace("Annotations","Images") + ".jpg"
     annotations = []
     dataset = []
     for index,row in dataframe.iterrows():
-        fname = os.path.join(img_path, row["name"].split('.')[0] + ".jpg")
+        fname = row["name"].replace("Annotations","Images") + ".jpg"
         xmin = row["xmin"]
         ymin = row["ymin"]
         xmax = row["xmax"]
@@ -106,25 +102,24 @@ def custom_dataset_function_train():
     return dataset
 
 
-def custom_dataset_function_test():
+def custom_dataset_function_val():
     # file_name, height, width, image_id
     #[{'file_name': '/home/samjith/0000180.jpg', 'height': 788, 'width': 1400, 'image_id': 1, 
     #   'annotations': [{'bbox': [250.0, 675.0, 23.0, 17.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 391.0, 'segmentation': [],
     #        'category_id': 0}, {'bbox': [295.0, 550.0, 21.0, 20.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 420.0, 'segmentation': [], 'category_id': 0},..
 
-    annot_path = os.path.join(base_path, params['test']['annot_path'])
-    img_path = os.path.join(base_path, params['test']['img_path'])
-
-    dataframe = creatingInfoData(annot_path)
-    old_fname = os.path.join(img_path, dataframe["name"][0].split('.')[0] + ".jpg")
+    dataframe = pd.read_pickle(os.path.join(base_path, f"v{params['ingest']['dcount']}" + "_val.pkl"))
+    
+    old_fname = (dataframe["name"][0]).replace("Annotations","Images") + ".jpg"
     annotations = []
     dataset = []
     for index,row in dataframe.iterrows():
-        fname = os.path.join(img_path, row["name"].split('.')[0] + ".jpg")
+        fname = row["name"].replace("Annotations","Images") + ".jpg"
         xmin = row["xmin"]
         ymin = row["ymin"]
         xmax = row["xmax"]
         ymax = row["ymax"]
+
         if old_fname != fname:
             img = cv2.imread(old_fname)
             dataset.append(
@@ -134,12 +129,14 @@ def custom_dataset_function_test():
                         "image_id":re.findall(r'\d+', old_fname)[0],
                         "annotations":annotations})
             annotations = []
+
         annotations.append(
             {"bbox":[xmin,ymin,xmax,ymax],
             'bbox_mode': 0, 
             'area': (xmax - xmin) * (ymax - ymin), 
             'segmentation': [],
             'category_id':0})
+     
         old_fname = fname
 
     img = cv2.imread(old_fname)
@@ -159,30 +156,31 @@ def custom_detectron(cache,params,metrics):
     cfg = cache["cfg"]
     predictor = cache["predictor"]
     dataset_name_train = cache["train"]
-    dataset_name_test = cache["test"]
+    dataset_name_val = cache["val"]
     results = cache["results"]
 
-    dataset_name_train = params['train']['dataset_name']
-    dataset_name_test = params['test']['dataset_name']
+    dataset_name_train = params['dataset']['name'] + "train"
+    dataset_name_val = params['dataset']['name'] + "val"
 
     DatasetCatalog.register(dataset_name_train, custom_dataset_function_train)
     MetadataCatalog.get(dataset_name_train).set(thing_classes = ["person"])
     
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(params['parameters']['config_file']))
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7 
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_val = 0.7 
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(params['parameters']['config_file'])
     predictor = DefaultPredictor(cfg)
-    DatasetCatalog.register(dataset_name_test, custom_dataset_function_test)
-    MetadataCatalog.get(dataset_name_test).set(thing_classes = ["person"])
+    DatasetCatalog.register(dataset_name_val, custom_dataset_function_val)
+    MetadataCatalog.get(dataset_name_val).set(thing_classes = ["person"])
 
-    my_dataset_test_metadata = MetadataCatalog.get(dataset_name_test).set(thing_classes = ["person"])
+    my_dataset_val_metadata = MetadataCatalog.get(dataset_name_val).set(thing_classes = ["person"])
     # from detectron2.utils.visualizer import ColorMode
-    dataset_dicts = DatasetCatalog.get(dataset_name_test)
+    dataset_dicts = DatasetCatalog.get(dataset_name_val)
     for d in random.sample(dataset_dicts, 5):    
+        print(d["file_name"])
         img = cv2.imread(d["file_name"])
         outputs = predictor(img)
-        v = Visualizer(img[:, :, ::-1], metadata = my_dataset_test_metadata, scale = 0.5)
+        v = Visualizer(img[:, :, ::-1], metadata = my_dataset_val_metadata, scale = 0.5)
         # vis = visualizer.draw_dataset_dict(d)
         out = v.draw_instance_predictions(outputs["instances"][outputs['instances'].pred_classes == 0].to("cpu"))
         # cv2_imshow(vis.get_image()[:, :, ::-1])
@@ -192,8 +190,8 @@ def custom_detectron(cache,params,metrics):
 
 
     # # Detectron Evaluator
-    evaluator = COCOEvaluator(dataset_name_test, cfg, False, output_dir = params["output"]["base_dir"])
-    val_loader = build_detection_test_loader(cfg, dataset_name_test)
+    evaluator = COCOEvaluator(dataset_name_val, cfg, False, output_dir = params["output"]["base_dir"])
+    val_loader = build_detection_test_loader(cfg, dataset_name_val)
     eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
 
     d1 = next(iter(eval_results.items()))
@@ -203,10 +201,10 @@ def custom_detectron(cache,params,metrics):
     s1 = json.dumps(d)
     results = json.loads(s1)
 
-    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test,"results":results}
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"val":dataset_name_val,"results":results}
     (cache,metrics) = custom_evaluator(cache,params,metrics)
     metrics.update(d)
-    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test,"results":results}
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"val":dataset_name_val,"results":results}
     return (cache,metrics)
 
 
@@ -216,23 +214,21 @@ def custom_evaluator(cache,params,metrics):
     cfg = cache["cfg"]
     predictor = cache["predictor"]
     dataset_name_train = cache["train"]
-    dataset_name_test = cache["test"]
+    dataset_name_val = cache["val"]
     results = cache["results"]
 
-    annot_path = params['test']['annot_path']
-    img_path = params['test']['img_path']
-
-    annot_path = os.path.join(base_path, params['test']['annot_path'])
-    img_path = os.path.join(base_path, params['test']['img_path'])
+    dataframe = pd.read_pickle(os.path.join(base_path, f"v{params['ingest']['dcount']}" + "_val.pkl"))
+    annot_path = dataframe["name"]
 
     gt_df = creatingInfoData(annot_path)
 
     for filename in tqdm(os.listdir(annot_path)):
-        ext = filename.split(".")[1]
-        if ext == "xml":
-            img = os.path.join(img_path, filename).replace("xml","jpg")
-        else:
-            img = os.path.join(img_path, filename).replace("txt","jpg")
+        # ext = filename.split(".")[1]
+        # if ext == "xml":
+        #     img = os.path.join(img_path, filename).replace("xml","jpg")
+        # else:
+        #     img = os.path.join(img_path, filename).replace("txt","jpg")
+        img = filename.replace("Annotations","Images") + ".jpg"
         img = cv2.imread(img)
         outputs = predictor(img)
         v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
@@ -248,8 +244,18 @@ def custom_evaluator(cache,params,metrics):
         for box in boxes:
             metrics = iou_mapping(box,gt_boxes,metrics)
 
+    for index, row in dataframe.iterrows():
+        annot_path = row["name"]
+        img = annot_path.replace("Annotations","Images") + ".jpg"
+        img = cv2.imread(img)
+        outputs = predictor(img)
+        v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
+        boxes = v._convert_boxes(outputs["instances"][outputs["instances"].pred_classes == 0].pred_boxes.to('cpu'))
+        # print(boxes,type(boxes))
+        gt_df_sub = dataframe
+
     metrics = evaluate(metrics)
-    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"test":dataset_name_test,"results":results}
+    cache = {"cfg":cfg,"predictor":predictor,"train":dataset_name_train,"val":dataset_name_val,"results":results}
     return (cache,metrics)
 
 
@@ -287,13 +293,16 @@ def results_logger_pretrained(cache,params,metrics):
         fout.write(json.dumps(metrics, indent = len(metrics)))
 
 
-print("-------------------------------")
-print("Inferencing.....")
-print("-------------------------------")
+if __name__ == "__main__":
+    print("-------------------------------")
+    print("Inferencing.....")
+    print("-------------------------------")
 
-cache = dict()
-metrics = dict()
-cache = {"cfg":None,"predictor":None,"train":None,"test":None,"results":None}
-metrics = {"TP":0,"FP":0,"FN":0,"IOU":[]}
-(cache,metrics) = custom_detectron(cache,params,metrics)
-results_logger_pretrained(cache,params,metrics)
+    cache = dict()
+    metrics = dict()
+    cache = {"cfg":None,"predictor":None,"train":None,"val":None,"results":None}
+    metrics = {"TP":0,"FP":0,"FN":0,"IOU":[]}
+    (cache,metrics) = custom_detectron(cache,params,metrics)
+    results_logger_pretrained(cache,params,metrics)
+
+    # df = pd.read_pickle(file_name)

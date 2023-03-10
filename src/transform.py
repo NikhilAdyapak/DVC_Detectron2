@@ -52,10 +52,10 @@ if __name__ == "__main__":
     annot_path_val = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}","val","Annotations")
 
     train_output_annot = creatingInfoData(annot_path_train)
-    aug_output_annot = aug_img_df(annot_path_aug)
+    # aug_output_annot = aug_img_df(annot_path_aug)
 
-    df_train = pd.concat([train_output_annot,aug_output_annot])
-    print(df_train)
+    # df_train = pd.concat([train_output_annot,aug_output_annot])
+    df_train = train_output_annot
     df_val = creatingInfoData(annot_path_val)
 
     print("-------------------------------")

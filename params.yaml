@@ -1,6 +1,7 @@
 dataset:
   path: archive # Put path to dataset here
-
+  name : Kar95
+  
 # Datatset
 # --Images
 # --Annotations
