@@ -12,3 +12,7 @@ src/helper/__pycache__
 archive/
 
 try.py
+
+img.txt
+
+_annotations*
