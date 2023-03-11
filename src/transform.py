@@ -4,6 +4,7 @@ import yaml
 import pandas as pd
 import glob
 import xml.etree.ElementTree as ET
+import natsort
 
 # from helper.xml_to_df import *
 from helper.txt_to_df import *
@@ -66,8 +67,10 @@ if __name__ == "__main__":
     df_train.to_pickle(os.path.join(output_transform,'v{}_train.pkl'.format(params['ingest']['dcount'])))
     df_val.to_pickle(os.path.join(output_transform,'v{}_val.pkl'.format(params['ingest']['dcount'])))
 
+    xml_list = []
     for root,subdir,files in os.walk(annot_path_train):
         xml_list = files
+    xml_list = natsort.natsorted(xml_list)
 
     with open(os.path.join(output_transform,'train_ids.txt'), 'w') as fp:
         for item in xml_list:
@@ -81,8 +84,10 @@ if __name__ == "__main__":
         print('Done')
 
 
+    xml_list = []
     for root,subdir,files in os.walk(annot_path_val):
         xml_list = files
+    xml_list = natsort.natsorted(xml_list)
 
     with open(os.path.join(output_transform,'val_ids.txt'), 'w') as fp:
         for item in xml_list:
