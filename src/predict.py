@@ -54,7 +54,7 @@ params = yaml.safe_load(open('params.yaml'))
 train_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}")
 transform_path = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
 output_pred = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
-os.makedirs(outputpred, exist_ok = True)
+os.makedirs(output_pred, exist_ok = True)
 
 
 def predict():
@@ -68,7 +68,7 @@ def predict():
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = params["detectron_parameters"]["SCORE_THRESH_TEST"]
     predictor = DefaultPredictor(cfg)
     evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir = "./output/")
-    val_loader = build_detection_test_loader(cfg, "my_dataset_test")
+    val_loader = build_detection_test_loader(cfg, "my_dataset_val")
     eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
 
     for d in glob.glob(os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images/*jpg")):    

@@ -43,8 +43,8 @@ def creatingInfoData(Annotpath):
 
 if __name__ == "__main__":
 
-    outputannot = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
-    os.makedirs(outputannot, exist_ok = True)
+    output_transform = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
+    os.makedirs(output_transform, exist_ok = True)
 
     annot_path_train = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}","train","Annotations")
 
@@ -63,19 +63,19 @@ if __name__ == "__main__":
     print("Tranforming.....")
     print("-------------------------------")
 
-    df_train.to_pickle(os.path.join(outputannot,'v{}_train.pkl'.format(params['ingest']['dcount'])))
-    df_val.to_pickle(os.path.join(outputannot,'v{}_val.pkl'.format(params['ingest']['dcount'])))
+    df_train.to_pickle(os.path.join(output_transform,'v{}_train.pkl'.format(params['ingest']['dcount'])))
+    df_val.to_pickle(os.path.join(output_transform,'v{}_val.pkl'.format(params['ingest']['dcount'])))
 
     for root,subdir,files in os.walk(annot_path_train):
         xml_list = files
 
-    with open(os.path.join(outputannot,'train_ids.txt'), 'w') as fp:
+    with open(os.path.join(output_transform,'train_ids.txt'), 'w') as fp:
         for item in xml_list:
             fp.write("%s\n" % item)
         print('Done')
     
     labels = ["person","person-like"]
-    with open(os.path.join(outputannot,'labels.txt'), 'w') as fp:
+    with open(os.path.join(output_transform,'labels.txt'), 'w') as fp:
         for item in labels:
             fp.write("%s\n" % item)
         print('Done')
@@ -84,13 +84,13 @@ if __name__ == "__main__":
     for root,subdir,files in os.walk(annot_path_val):
         xml_list = files
 
-    with open(os.path.join(outputannot,'val_ids.txt'), 'w') as fp:
+    with open(os.path.join(output_transform,'val_ids.txt'), 'w') as fp:
         for item in xml_list:
             fp.write("%s\n" % item)
         print('Done')
 
-    cmd_train = "python3 src/helper/voc2coco.py --ann_dir " + annot_path_train + " --ann_ids " + os.path.join(outputannot,'train_ids.txt') + " --labels "+ os.path.join(outputannot,'labels.txt') + " --output " + os.path.join(outputannot,"_annotations_train.coco.json")
-    cmd_val = "python3 src/helper/voc2coco.py --ann_dir " + annot_path_val + " --ann_ids " + os.path.join(outputannot,'val_ids.txt') + " --labels "+ os.path.join(outputannot,'labels.txt') + " --output " + os.path.join(outputannot,"_annotations_val.coco.json")
+    cmd_train = "python3 src/helper/voc2coco.py --ann_dir " + annot_path_train + " --ann_ids " + os.path.join(output_transform,'train_ids.txt') + " --labels "+ os.path.join(output_transform,'labels.txt') + " --output " + os.path.join(output_transform,"_annotations_train.coco.json")
+    cmd_val = "python3 src/helper/voc2coco.py --ann_dir " + annot_path_val + " --ann_ids " + os.path.join(output_transform,'val_ids.txt') + " --labels "+ os.path.join(output_transform,'labels.txt') + " --output " + os.path.join(output_transform,"_annotations_val.coco.json")
 
     os.system(cmd_train)
     os.system(cmd_val)
