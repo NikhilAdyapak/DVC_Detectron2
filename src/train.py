@@ -48,16 +48,15 @@ if len(sys.argv) != 3:
     sys.exit(1)
 
 params = yaml.safe_load(open('params.yaml'))
+transform_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}")
 output_train = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
-os.makedirs(outputpred, exist_ok = True)
-
-base_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}")
+os.makedirs(output_train, exist_ok = True)
 
 
 def detectron_custom_train():
     # Custom Training
-    register_coco_instances("my_dataset_train", {}, os.path.join(base_path,"_annotations_train.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","train/Images"))
-    register_coco_instances("my_dataset_val", {}, os.path.join(base_path,"_annotations_val.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images"))
+    register_coco_instances("my_dataset_train", {}, os.path.join(transform_path,"_annotations_train.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","train/Images"))
+    register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images"))
 
     my_dataset_train_metadata = MetadataCatalog.get("my_dataset_train")
     dataset_dicts = DatasetCatalog.get("my_dataset_train")
