@@ -1,3 +1,5 @@
+import os,json
+
 def results_logger(det_metrics,my_metrics,path,params):
     
     hyper_parameters = {
@@ -9,8 +11,8 @@ def results_logger(det_metrics,my_metrics,path,params):
         "MAX_ITER" :params['detectron_parameters']['MAX_ITER'],
         "GAMMA" :params['detectron_parameters']['GAMMA'],
         "BATCH_SIZE_PER_IMAGE" : params['detectron_parameters']['BATCH_SIZE_PER_IMAGE'],
-        "NUM_CLASSES" : params['detectron_parameters']['NUM_CLASSES']
-        "EVAL_PERIOD" : params['detectron_parameters']['EVAL_PERIOD']
+        "NUM_CLASSES" : params['detectron_parameters']['NUM_CLASSES'],
+        "EVAL_PERIOD" : params['detectron_parameters']['EVAL_PERIOD'],
         "SCORE_THRESH_TEST" : params['detectron_parameters']['SCORE_THRESH_TEST']
     }
 

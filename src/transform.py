@@ -77,7 +77,7 @@ if __name__ == "__main__":
             fp.write("%s\n" % item)
         print('Done')
     
-    labels = ["person","person-like"]
+    labels = ["person","person-like","orange","brocolli","cat"]
     with open(os.path.join(output_transform,'labels.txt'), 'w') as fp:
         for item in labels:
             fp.write("%s\n" % item)

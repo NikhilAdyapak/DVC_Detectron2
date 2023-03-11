@@ -39,7 +39,7 @@ from tqdm import tqdm
 
 from helper.xml_to_df import *
 from helper.my_evaluate import *
-
+from helper.my_logger import *
 
 if len(sys.argv) != 4:
     sys.stderr.write('Arguments error. Usage:\n')
@@ -69,23 +69,24 @@ def predict():
     predictor = DefaultPredictor(cfg)
     evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir = "./output/")
     val_loader = build_detection_test_loader(cfg, "my_dataset_val")
-    eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
+    # eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
 
-    for d in glob.glob(os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images/*jpg")):    
-        img = cv2.imread(d)
-        outputs = predictor(img)
-        v = Visualizer(img[:, :, ::-1], metadata = test_metadata, scale = 0.5)
-        # vis = visualizer.draw_dataset_dict(d)
-        out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-        # cv2_imshow(vis.get_image()[:, :, ::-1])
-        cv2.imshow("output",out.get_image()[:, :, ::-1])
-        cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # for d in glob.glob(os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images/*jpg")):    
+    #     img = cv2.imread(d)
+    #     outputs = predictor(img)
+    #     v = Visualizer(img[:, :, ::-1], metadata = test_metadata, scale = 0.5)
+    #     # vis = visualizer.draw_dataset_dict(d)
+    #     out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
+    #     # cv2_imshow(vis.get_image()[:, :, ::-1])
+    #     cv2.imshow("output",out.get_image()[:, :, ::-1])
+    #     cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
 
-    d1 = next(iter(eval_results.items()))
-    d2 = next(iter(eval_results.values()))
-    det_metrics = {'AP':d2["AP"],'AP50':d2["AP50"],'AP75':d2["AP75"],'APs':d2['APs']}
+    # d1 = next(iter(eval_results.items()))
+    # d2 = next(iter(eval_results.values()))
+    # det_metrics = {'AP':d2["AP"],'AP50':d2["AP50"],'AP75':d2["AP75"],'APs':d2['APs']}
+    det_metrics = {'AP':0,'AP50':0,'AP75':0,'APs':0}
     # s1 = json.dumps(d)
     # results = json.loads(s1)
 
