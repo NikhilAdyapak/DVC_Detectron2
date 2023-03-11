@@ -49,26 +49,26 @@ stages:
   #   outs:
   #   - data/infer
 
-  # train:
-  #   cmd: python3 src/train.py data/transform data/train
-  #   deps:
-  #   - src/train.py
-  #   - data/transform
-  #   params:
-  #   - ingest.dcount
-  #   outs:
-  #   - data/train
+  train:
+    cmd: python3 src/train.py data/transform data/train
+    deps:
+    - src/train.py
+    - data/transform
+    params:
+    - ingest.dcount
+    outs:
+    - data/train
 
-  # predict:
-  #   cmd: python3 src/predict.py data/train data/transform data/predict
-  #   deps:
-  #   - src/predict.py
-  #   - data/train
-  #   - data/transform
-  #   params:
-  #   - ingest.dcount
-  #   outs:
-  #   - data/predict
+  predict:
+    cmd: python3 src/predict.py data/train data/transform data/predict
+    deps:
+    - src/predict.py
+    - data/train
+    - data/transform
+    params:
+    - ingest.dcount
+    outs:
+    - data/predict
 
   # compare:
   #   cmd: python3 src/compare.py data/infer data/predict data/store
