@@ -10,3 +10,5 @@ output/
 src/helper/__pycache__
 
 archive/
+
+try.py
