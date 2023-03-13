@@ -93,7 +93,7 @@ def custom_dataset_function_train():
             'bbox_mode': 0, 
             'area': (xmax - xmin) * (ymax - ymin), 
             'segmentation': [],
-            'category_id':1})
+            'category_id':0})
      
         old_fname = fname
 
@@ -142,7 +142,7 @@ def custom_dataset_function_test():
             'bbox_mode': 0, 
             'area': (xmax - xmin) * (ymax - ymin), 
             'segmentation': [],
-            'category_id':1})
+            'category_id':0})
         old_fname = fname
 
     img = cv2.imread(old_fname)
@@ -160,10 +160,10 @@ def custom_dataset_function_test():
 # register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("home/yln1kor/nikhil-test/Datasets/kar_val"))
 
 DatasetCatalog.register("my_dataset_train", custom_dataset_function_train)
-MetadataCatalog.get("my_dataset_train")
+MetadataCatalog.get("my_dataset_train").set(thing_classes = ["person"])
 
 DatasetCatalog.register("my_dataset_val", custom_dataset_function_test)
-MetadataCatalog.get("my_dataset_val")
+MetadataCatalog.get("my_dataset_val").set(thing_classes = ["person"])
 
 
 # annot_path = "data/split/v3/train/Annotations"
@@ -206,17 +206,21 @@ trainer = DefaultTrainer(cfg)
 trainer.resume_or_load(resume = False)
 trainer.train()
 
+val_metadata = MetadataCatalog.get("my_dataset_val")
+print(val_metadata.thing_classes)
+
 
 cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.85
 predictor = DefaultPredictor(cfg)
-evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir="./output_trained/")
+evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir="./output/")
 val_loader = build_detection_test_loader(cfg, "my_dataset_val")
 inference_on_dataset(predictor.model, val_loader, evaluator)
 
+
 test_metadata = MetadataCatalog.get("my_dataset_val")
 dataset_dicts = DatasetCatalog.get("my_dataset_val")
-for d in random.sample(dataset_dicts, 3):
+for d in random.sample(dataset_dicts, 10):
     img = cv2.imread(d["file_name"])
     outputs = predictor(img)
     v = Visualizer(img[:, :, ::-1], metadata = test_metadata, scale = 0.5)
