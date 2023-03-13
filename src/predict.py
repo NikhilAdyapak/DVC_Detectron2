@@ -59,7 +59,9 @@ os.makedirs(output_pred, exist_ok = True)
 
 def predict():
 
-    register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images"))
+    # register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images"))
+
+    register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("home/yln1kor/nikhil-test/Datasets/kar_val"))
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(params["detectron_parameters"]["config_file"]))
@@ -92,20 +94,21 @@ def predict():
 
 
     annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
-    img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images")
+    img_path = "home/yln1kor/nikhil-test/Datasets/kar_val"
     
     gt_df = creatingInfoData(annot_path)
     gt_df["name"] = [x["name"].split("/")[-1] for index,x in gt_df.iterrows()]
 
     metrics = {"TP":0,"FP":0,"FN":0,"IOU":[]}
 
-    for filename in tqdm(os.listdir(annot_path)):
-        img = os.path.join(img_path, filename).replace("xml","jpg")
+    for filename in tqdm(os.listdir(img_path)):
+        temp = filename.split("_")[0]
+        img = os.path.join(img_path, filename)
         img = cv2.imread(img)
         outputs = predictor(img)
         v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
         boxes = v._convert_boxes(outputs["instances"][outputs["instances"].pred_classes == 0].pred_boxes.to('cpu'))
-        gt_df_sub = gt_df[gt_df["name"] == filename.split(".")[0]]
+        gt_df_sub = gt_df[gt_df["name"] == temp]
         gt_boxes = []
         for index, row in gt_df_sub.iterrows():
             gt_boxes.append([row["xmin"],row["ymin"],row["xmax"],row["ymax"]])

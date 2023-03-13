@@ -55,8 +55,11 @@ os.makedirs(output_train, exist_ok = True)
 
 def detectron_custom_train():
     # Custom Training
-    register_coco_instances("my_dataset_train", {}, os.path.join(transform_path,"_annotations_train.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","train/Images"))
-    register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images"))
+    # register_coco_instances("my_dataset_train", {}, os.path.join(transform_path,"_annotations_train.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","train/Images"))
+    # register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images"))
+
+    register_coco_instances("my_dataset_train", {}, os.path.join(transform_path,"_annotations_train.coco.json"), os.path.join("/home/yln1kor/nikhil-test/Datasets/kar_train"))
+    register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("home/yln1kor/nikhil-test/Datasets/kar_val"))
 
     my_dataset_train_metadata = MetadataCatalog.get("my_dataset_train")
     dataset_dicts = DatasetCatalog.get("my_dataset_train")
@@ -72,7 +75,7 @@ def detectron_custom_train():
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(params["detectron_parameters"]["config_file"]))
     cfg.DATASETS.TRAIN = ("my_dataset_train",)
-    cfg.DATASETS.TEST = ("my_dataset_test",)
+    cfg.DATASETS.TEST = ("my_dataset_val",)
 
     cfg.DATALOADER.NUM_WORKERS = params["detectron_parameters"]["NUM_WORKERS"]
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(params["detectron_parameters"]["config_file"])
