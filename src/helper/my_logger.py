@@ -27,7 +27,9 @@ def results_logger(det_metrics,my_metrics,path,params):
         'AP': det_metrics["AP"],
         'AP50': det_metrics["AP50"],
         'AP75': det_metrics["AP75"],
-        'APs': det_metrics['APs']
+        'APs': det_metrics['APs'],
+        'APm': det_metrics['APm'],
+        'APl': det_metrics['APl']
     }
 
     with open(os.path.join(path,'det2_hyperparamters_{}.txt'.format(params['ingest']['dcount'])), 'w') as fout:

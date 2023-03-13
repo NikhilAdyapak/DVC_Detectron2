@@ -57,44 +57,61 @@ output_pred = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
 os.makedirs(output_pred, exist_ok = True)
 
 
+class CocoTrainer(DefaultTrainer):
+
+  @classmethod
+  def build_evaluator(cls, cfg, dataset_name, output_folder=None):
+
+    if output_folder is None:
+        os.makedirs("coco_eval", exist_ok=True)
+        output_folder = "coco_eval"
+
+    return COCOEvaluator(dataset_name, cfg, False, output_folder)
+
 def predict():
 
     # register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images"))
 
-    register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("home/yln1kor/nikhil-test/Datasets/kar_val"))
+    register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("/home/yln1kor/nikhil-test/Datasets/kar_val"))
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(params["detectron_parameters"]["config_file"]))
     cfg.OUTPUT_DIR = train_path
-    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
+    cfg.MODEL.WEIGHTS = "/home/yln1kor/nikhil-test/DVC_Detectron2_Work/data/train/v3/model_final.pth"
+    # print("\n\n\n",os.path.join(cfg.OUTPUT_DIR, "model_final.pth"),"\n\n\n")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = params["detectron_parameters"]["SCORE_THRESH_TEST"]
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = params["detectron_parameters"]["NUM_CLASSES"]
+
+    # trainer = DefaultTrainer(cfg) 
+    # trainer.resume_or_load(resume = False)
+    
     predictor = DefaultPredictor(cfg)
-    evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir = "./output/")
+    evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir = "/home/yln1kor/nikhil-test/DVC_Detectron2_Work/data/train/v3/")
     val_loader = build_detection_test_loader(cfg, "my_dataset_val")
-    # eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
+    eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
 
-    # for d in glob.glob(os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images/*jpg")):    
-    #     img = cv2.imread(d)
-    #     outputs = predictor(img)
-    #     v = Visualizer(img[:, :, ::-1], metadata = test_metadata, scale = 0.5)
-    #     # vis = visualizer.draw_dataset_dict(d)
-    #     out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-    #     # cv2_imshow(vis.get_image()[:, :, ::-1])
-    #     cv2.imshow("output",out.get_image()[:, :, ::-1])
-    #     cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+    test_metadata = MetadataCatalog.get("my_dataset_val")
+    dataset_dicts = DatasetCatalog.get("my_dataset_val")
+    for d in random.sample(dataset_dicts, 3):    
+        img = cv2.imread(d["file_name"])
+        outputs = predictor(img)
+        v = Visualizer(img[:, :, ::-1], metadata = test_metadata, scale = 0.5)
+        out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
+        cv2.imshow("output",out.get_image()[:, :, ::-1])
+        cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
-    # d1 = next(iter(eval_results.items()))
-    # d2 = next(iter(eval_results.values()))
-    # det_metrics = {'AP':d2["AP"],'AP50':d2["AP50"],'AP75':d2["AP75"],'APs':d2['APs']}
-    det_metrics = {'AP':0,'AP50':0,'AP75':0,'APs':0}
+    d1 = next(iter(eval_results.items()))
+    d2 = next(iter(eval_results.values()))
+    det_metrics = {'AP':d2["AP"],'AP50':d2["AP50"],'AP75':d2["AP75"],'APs':d2['APs'],'APm':d2['APm'],'APl':d2['APl']}
+    # det_metrics = {'AP':0,'AP50':0,'AP75':0,'APs':0}
     # s1 = json.dumps(d)
     # results = json.loads(s1)
 
 
     annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
-    img_path = "home/yln1kor/nikhil-test/Datasets/kar_val"
+    img_path = "/home/yln1kor/nikhil-test/Datasets/kar_val"
     
     gt_df = creatingInfoData(annot_path)
     gt_df["name"] = [x["name"].split("/")[-1] for index,x in gt_df.iterrows()]
@@ -107,12 +124,12 @@ def predict():
         img = cv2.imread(img)
         outputs = predictor(img)
         v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
-        boxes = v._convert_boxes(outputs["instances"][outputs["instances"].pred_classes == 0].pred_boxes.to('cpu'))
+        boxes = v._convert_boxes(outputs["instances"].pred_boxes.to('cpu'))
         gt_df_sub = gt_df[gt_df["name"] == temp]
         gt_boxes = []
         for index, row in gt_df_sub.iterrows():
             gt_boxes.append([row["xmin"],row["ymin"],row["xmax"],row["ymax"]])
-        out = v.draw_instance_predictions(outputs["instances"][outputs['instances'].pred_classes == 0].to("cpu"))
+        out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
 
         for box in boxes:
             metrics = iou_mapping(box,gt_boxes,metrics)
