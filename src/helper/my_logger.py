@@ -32,8 +32,8 @@ def results_logger(det_metrics,my_metrics,path,params):
         'APl': det_metrics['APl']
     }
 
-    with open(os.path.join(path,'det2_hyperparamters_{}.txt'.format(params['ingest']['dcount'])), 'w') as fout:
+    with open(os.path.join(path,'det2_hyperparamters_{}.json'.format(params['ingest']['dcount'])), 'w') as fout:
         fout.write(json.dumps(hyper_parameters, indent = len(hyper_parameters)))
 
-    with open(os.path.join(path,'metrics_{}.txt'.format(params['ingest']['dcount'])), 'w') as fout:
+    with open(os.path.join(path,'metrics_{}.json'.format(params['ingest']['dcount'])), 'w') as fout:
         fout.write(json.dumps(metrics, indent = len(metrics)))

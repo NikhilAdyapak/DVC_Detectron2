@@ -37,7 +37,6 @@ from detectron2.utils.visualizer import Visualizer
 import yaml,shutil
 from tqdm import tqdm
 
-from helper.xml_to_df import *
 from helper.my_evaluate import *
 from helper.my_logger import *
 
@@ -55,29 +54,92 @@ train_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}")
 transform_path = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
 output_pred = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
 os.makedirs(output_pred, exist_ok = True)
+annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
+img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images")
+
+def creatingInfoData(Annotpath):
+    xml_list = []
+    for xml_file in sorted(glob.glob(str(Annotpath+'/*.xml*'))):
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+        for member in root.findall('object'):
+            file_name = xml_file.split('/')[-1][0:-4]
+            value = (
+                     int(member[4][0].text),
+                     int(member[4][1].text),
+                     int(member[4][2].text),
+                     int(member[4][3].text),
+                     file_name,
+                     "person",
+                     )
+            xml_list.append(value)
+    column_name = ['xmin', 'ymin', 'xmax', 'ymax', 'name', 'label']
+    xml_df = pd.DataFrame(xml_list, columns = column_name)
+    return xml_df
 
 
-class CocoTrainer(DefaultTrainer):
+def custom_dataset_function_test():
+    # file_name, height, width, image_id
+    #[{'file_name': '/home/samjith/0000180.jpg', 'height': 788, 'width': 1400, 'image_id': 1, 
+    #   'annotations': [{'bbox': [250.0, 675.0, 23.0, 17.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 391.0, 'segmentation': [],
+    #        'category_id': 0}, {'bbox': [295.0, 550.0, 21.0, 20.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 420.0, 'segmentation': [], 'category_id': 0},..
 
-  @classmethod
-  def build_evaluator(cls, cfg, dataset_name, output_folder=None):
+    annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
+    img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images")
+    
+    dataframe = creatingInfoData(annot_path)
 
-    if output_folder is None:
-        os.makedirs("coco_eval", exist_ok=True)
-        output_folder = "coco_eval"
+    old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    annotations = []
+    dataset = []
+    for index,row in dataframe.iterrows():
+        fname = os.path.join(img_path, row["name"]) + ".jpg"
+        xmin = row["xmin"]
+        ymin = row["ymin"]
+        xmax = row["xmax"]
+        ymax = row["ymax"]
+        if old_fname != fname:
+            img = cv2.imread(old_fname)
+            dataset.append(
+                        {"file_name":old_fname , 
+                        "height":img.shape[0], 
+                        "width":img.shape[1],
+                        "image_id":re.findall(r'\d+', old_fname)[0],
+                        "annotations":annotations})
+            annotations = []
+        annotations.append(
+            {"bbox":[xmin,ymin,xmax,ymax],
+            'bbox_mode': 0, 
+            'area': (xmax - xmin) * (ymax - ymin), 
+            'segmentation': [],
+            'category_id':0})
+        old_fname = fname
 
-    return COCOEvaluator(dataset_name, cfg, False, output_folder)
+    img = cv2.imread(old_fname)
+    dataset.append(
+                        {"file_name":old_fname , 
+                        "height":img.shape[0], 
+                        "width":img.shape[1],
+                        "image_id":re.findall(r'\d+', old_fname)[0],
+                        "annotations":annotations})
+
+    return dataset
+
 
 def predict():
 
     # register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images"))
 
-    register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("/home/yln1kor/nikhil-test/Datasets/kar_val"))
+    # register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("/home/yln1kor/nikhil-test/Datasets/kar_val"))
+
+    DatasetCatalog.register("my_dataset_val", custom_dataset_function_test)
+    MetadataCatalog.get("my_dataset_val").set(thing_classes = ["person"])
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(params["detectron_parameters"]["config_file"]))
     cfg.OUTPUT_DIR = train_path
-    cfg.MODEL.WEIGHTS = "/home/yln1kor/nikhil-test/DVC_Detectron2_Work/data/train/v3/model_final.pth"
+    # cfg.MODEL.WEIGHTS = "/home/yln1kor/nikhil-test/DVC_Detectron2_Work/data/train/v3/model_final.pth"
+    cfg.MODEL.WEIGHTS = os.path.join(train_path,"model_final.pth")
     # print("\n\n\n",os.path.join(cfg.OUTPUT_DIR, "model_final.pth"),"\n\n\n")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = params["detectron_parameters"]["SCORE_THRESH_TEST"]
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = params["detectron_parameters"]["NUM_CLASSES"]
@@ -86,7 +148,7 @@ def predict():
     # trainer.resume_or_load(resume = False)
     
     predictor = DefaultPredictor(cfg)
-    evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir = "/home/yln1kor/nikhil-test/DVC_Detectron2_Work/data/train/v3/")
+    evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir = train_path)
     val_loader = build_detection_test_loader(cfg, "my_dataset_val")
     eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
 
@@ -108,29 +170,23 @@ def predict():
     # det_metrics = {'AP':0,'AP50':0,'AP75':0,'APs':0}
     # s1 = json.dumps(d)
     # results = json.loads(s1)
-
-
-    annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
-    img_path = "/home/yln1kor/nikhil-test/Datasets/kar_val"
     
     gt_df = creatingInfoData(annot_path)
     gt_df["name"] = [x["name"].split("/")[-1] for index,x in gt_df.iterrows()]
+    print(gt_df)
 
     metrics = {"TP":0,"FP":0,"FN":0,"IOU":[]}
 
-    for filename in tqdm(os.listdir(img_path)):
-        temp = filename.split("_")[0]
-        img = os.path.join(img_path, filename)
+    for filename in tqdm(os.listdir(annot_path)):
+        img = os.path.join(img_path, filename).replace("xml","jpg")
         img = cv2.imread(img)
         outputs = predictor(img)
         v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
         boxes = v._convert_boxes(outputs["instances"].pred_boxes.to('cpu'))
-        gt_df_sub = gt_df[gt_df["name"] == temp]
+        gt_df_sub = gt_df[gt_df["name"] == filename.split(".")[0]]
         gt_boxes = []
         for index, row in gt_df_sub.iterrows():
             gt_boxes.append([row["xmin"],row["ymin"],row["xmax"],row["ymax"]])
-        out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-
         for box in boxes:
             metrics = iou_mapping(box,gt_boxes,metrics)
 

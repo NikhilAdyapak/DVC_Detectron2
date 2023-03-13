@@ -22,4 +22,4 @@ copy_tree(pred, datastore)
 copy_tree(infer, datastore)
 
 print(datastore)
-print("\n\nDone-------------")
+print("\n\n\nDone-------------\n\n\n")

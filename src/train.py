@@ -37,7 +37,6 @@ from detectron2.utils.visualizer import Visualizer
 import yaml,shutil
 from tqdm import tqdm
 
-from helper.xml_to_df import *
 from helper.custom_evaluate import *
 
 if len(sys.argv) != 3:
@@ -53,13 +52,139 @@ output_train = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
 os.makedirs(output_train, exist_ok = True)
 
 
+def creatingInfoData(Annotpath):
+    xml_list = []
+    for xml_file in sorted(glob.glob(str(Annotpath+'/*.xml*'))):
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+        for member in root.findall('object'):
+            file_name = xml_file.split('/')[-1][0:-4]
+            value = (
+                     int(member[4][0].text),
+                     int(member[4][1].text),
+                     int(member[4][2].text),
+                     int(member[4][3].text),
+                     file_name,
+                     "person",
+                     )
+            xml_list.append(value)
+    column_name = ['xmin', 'ymin', 'xmax', 'ymax', 'name', 'label']
+    xml_df = pd.DataFrame(xml_list, columns = column_name)
+    return xml_df
+
+
+def custom_dataset_function_train():
+    # file_name, height, width, image_id
+    #[{'file_name': '/home/samjith/0000180.jpg', 'height': 788, 'width': 1400, 'image_id': 1, 
+    #   'annotations': [{'bbox': [250.0, 675.0, 23.0, 17.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 391.0, 'segmentation': [],
+    #        'category_id': 0}, {'bbox': [295.0, 550.0, 21.0, 20.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 420.0, 'segmentation': [], 'category_id': 0},..
+
+    annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","train/Annotations")
+    img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","train/Images")
+
+    dataframe = creatingInfoData(annot_path)
+    
+    old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    annotations = []
+    dataset = []
+    for index,row in dataframe.iterrows():
+        fname = os.path.join(img_path, row["name"]) + ".jpg"
+        xmin = row["xmin"]
+        ymin = row["ymin"]
+        xmax = row["xmax"]
+        ymax = row["ymax"]
+
+        if old_fname != fname:
+            img = cv2.imread(old_fname)
+            dataset.append(
+                        {"file_name":old_fname , 
+                        "height":img.shape[0], 
+                        "width":img.shape[1],
+                        "image_id":re.findall(r'\d+', old_fname)[0],
+                        "annotations":annotations})
+            annotations = []
+
+        annotations.append(
+            {"bbox":[xmin,ymin,xmax,ymax],
+            'bbox_mode': 0, 
+            'area': (xmax - xmin) * (ymax - ymin), 
+            'segmentation': [],
+            'category_id':0})
+     
+        old_fname = fname
+
+    img = cv2.imread(old_fname)
+    dataset.append(
+                        {"file_name":old_fname , 
+                        "height":img.shape[0], 
+                        "width":img.shape[1],
+                        "image_id":re.findall(r'\d+', old_fname)[0],
+                        "annotations":annotations})
+
+    return dataset
+
+
+def custom_dataset_function_test():
+    # file_name, height, width, image_id
+    #[{'file_name': '/home/samjith/0000180.jpg', 'height': 788, 'width': 1400, 'image_id': 1, 
+    #   'annotations': [{'bbox': [250.0, 675.0, 23.0, 17.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 391.0, 'segmentation': [],
+    #        'category_id': 0}, {'bbox': [295.0, 550.0, 21.0, 20.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 420.0, 'segmentation': [], 'category_id': 0},..
+
+    annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
+    img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images")
+    
+    dataframe = creatingInfoData(annot_path)
+
+    old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    annotations = []
+    dataset = []
+    for index,row in dataframe.iterrows():
+        fname = os.path.join(img_path, row["name"]) + ".jpg"
+        xmin = row["xmin"]
+        ymin = row["ymin"]
+        xmax = row["xmax"]
+        ymax = row["ymax"]
+        if old_fname != fname:
+            img = cv2.imread(old_fname)
+            dataset.append(
+                        {"file_name":old_fname , 
+                        "height":img.shape[0], 
+                        "width":img.shape[1],
+                        "image_id":re.findall(r'\d+', old_fname)[0],
+                        "annotations":annotations})
+            annotations = []
+        annotations.append(
+            {"bbox":[xmin,ymin,xmax,ymax],
+            'bbox_mode': 0, 
+            'area': (xmax - xmin) * (ymax - ymin), 
+            'segmentation': [],
+            'category_id':0})
+        old_fname = fname
+
+    img = cv2.imread(old_fname)
+    dataset.append(
+                        {"file_name":old_fname , 
+                        "height":img.shape[0], 
+                        "width":img.shape[1],
+                        "image_id":re.findall(r'\d+', old_fname)[0],
+                        "annotations":annotations})
+
+    return dataset
+
+
 def detectron_custom_train():
     # Custom Training
     # register_coco_instances("my_dataset_train", {}, os.path.join(transform_path,"_annotations_train.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","train/Images"))
     # register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images"))
 
-    register_coco_instances("my_dataset_train", {}, os.path.join(transform_path,"_annotations_train.coco.json"), os.path.join("/home/yln1kor/nikhil-test/Datasets/kar_train"))
-    register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("home/yln1kor/nikhil-test/Datasets/kar_val"))
+    # register_coco_instances("my_dataset_train", {}, os.path.join(transform_path,"_annotations_train.coco.json"), os.path.join("/home/yln1kor/nikhil-test/Datasets/kar_train"))
+    # register_coco_instances("my_dataset_val", {}, os.path.join(transform_path,"_annotations_val.coco.json"), os.path.join("home/yln1kor/nikhil-test/Datasets/kar_val"))
+
+    DatasetCatalog.register("my_dataset_train", custom_dataset_function_train)
+    MetadataCatalog.get("my_dataset_train").set(thing_classes = ["person"])
+
+    DatasetCatalog.register("my_dataset_val", custom_dataset_function_test)
+    MetadataCatalog.get("my_dataset_val").set(thing_classes = ["person"])
 
     my_dataset_train_metadata = MetadataCatalog.get("my_dataset_train")
     dataset_dicts = DatasetCatalog.get("my_dataset_train")

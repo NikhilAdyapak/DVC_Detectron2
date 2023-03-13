@@ -38,6 +38,8 @@ from tqdm import tqdm
 
 # from helper.xml_to_df import *
 from helper.custom_evaluate import *
+from helper.my_logger import *
+
 from detectron2.data.datasets import register_coco_instances
 
 if len(sys.argv) != 3:
@@ -52,6 +54,29 @@ params = yaml.safe_load(open('params.yaml'))
 transform_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}")
 output_infer = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
 os.makedirs(output_infer, exist_ok = True)
+annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
+img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images")
+
+
+def creatingInfoData(Annotpath):
+    xml_list = []
+    for xml_file in sorted(glob.glob(str(Annotpath+'/*.xml*'))):
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+        for member in root.findall('object'):
+            file_name = xml_file.split('/')[-1][0:-4]
+            value = (
+                     int(member[4][0].text),
+                     int(member[4][1].text),
+                     int(member[4][2].text),
+                     int(member[4][3].text),
+                     file_name,
+                     "person",
+                     )
+            xml_list.append(value)
+    column_name = ['xmin', 'ymin', 'xmax', 'ymax', 'name', 'label']
+    xml_df = pd.DataFrame(xml_list, columns = column_name)
+    return xml_df
 
 
 def custom_dataset_function_test():
@@ -88,7 +113,7 @@ def custom_dataset_function_test():
             'bbox_mode': 0, 
             'area': (xmax - xmin) * (ymax - ymin), 
             'segmentation': [],
-            'category_id':1})
+            'category_id':0})
         old_fname = fname
 
     img = cv2.imread(old_fname)
@@ -118,7 +143,7 @@ def detectron_custom_infer():
     # cv2.destroyAllWindows()
 
     DatasetCatalog.register("my_dataset_val", custom_dataset_function_test)
-    MetadataCatalog.get("my_dataset_val").set(thing_classes = ["persons"])
+    MetadataCatalog.get("my_dataset_val").set(thing_classes = ["person"])
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(params['detectron_parameters']['config_file']))
@@ -126,15 +151,14 @@ def detectron_custom_infer():
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(params['detectron_parameters']['config_file'])
     predictor = DefaultPredictor(cfg)
 
-    my_dataset_test_metadata = MetadataCatalog.get("my_dataset_val").set(thing_classes = ["person","person-like"])
-    # from detectron2.utils.visualizer import ColorMode
+    test_metadata = MetadataCatalog.get("my_dataset_val")
     dataset_dicts = DatasetCatalog.get("my_dataset_val")
-    for d in random.sample(dataset_dicts, 5):    
+    for d in random.sample(dataset_dicts, 10):
         img = cv2.imread(d["file_name"])
         outputs = predictor(img)
-        v = Visualizer(img[:, :, ::-1], metadata = my_dataset_test_metadata, scale = 0.5)
+        v = Visualizer(img[:, :, ::-1], metadata = test_metadata, scale = 0.5)
         # vis = visualizer.draw_dataset_dict(d)
-        out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
+        out = v.draw_instance_predictions(outputs["instances"][outputs['instances'].pred_classes == 0].to("cpu"))
         # cv2_imshow(vis.get_image()[:, :, ::-1])
         cv2.imshow("output",out.get_image()[:, :, ::-1])
         cv2.waitKey(0)
@@ -148,10 +172,39 @@ def detectron_custom_infer():
     # # MetadataCatalog.get("my_dataset_val").set(thing_classes = ['persons', 'person', 'person-like'])
     
     # predictor = DefaultPredictor(cfg)
-    # evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir = output_infer)
-    # val_loader = build_detection_test_loader(cfg, "my_dataset_val")
-    # eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
-    # print(eval_results)
+    evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir = output_infer)
+    val_loader = build_detection_test_loader(cfg, "my_dataset_val")
+    eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
+    print(eval_results)
+
+    d1 = next(iter(eval_results.items()))
+    d2 = next(iter(eval_results.values()))
+    det_metrics = {'AP':d2["AP"],'AP50':d2["AP50"],'AP75':d2["AP75"],'APs':d2['APs'],'APm':d2['APm'],'APl':d2['APl']}
+    # det_metrics = {'AP':0,'AP50':0,'AP75':0,'APs':0}
+    # s1 = json.dumps(d)
+    # results = json.loads(s1)
+    
+    gt_df = creatingInfoData(annot_path)
+    gt_df["name"] = [x["name"].split("/")[-1] for index,x in gt_df.iterrows()]
+    print(gt_df)
+
+    metrics = {"TP":0,"FP":0,"FN":0,"IOU":[]}
+
+    for filename in tqdm(os.listdir(annot_path)):
+        img = os.path.join(img_path, filename).replace("xml","jpg")
+        img = cv2.imread(img)
+        outputs = predictor(img)
+        v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
+        boxes = v._convert_boxes(outputs["instances"].pred_boxes.to('cpu'))
+        gt_df_sub = gt_df[gt_df["name"] == filename.split(".")[0]]
+        gt_boxes = []
+        for index, row in gt_df_sub.iterrows():
+            gt_boxes.append([row["xmin"],row["ymin"],row["xmax"],row["ymax"]])
+        for box in boxes:
+            metrics = iou_mapping(box,gt_boxes,metrics)
+
+    my_metrics = evaluate(metrics)
+    results_logger(det_metrics,my_metrics,output_infer,params)
 
 
 
