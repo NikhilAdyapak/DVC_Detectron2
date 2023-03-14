@@ -6,6 +6,9 @@ dataset:
 # --Images
 # --Annotations
 
+validation:
+  path: Val
+
 ingest:
   dcount: 3
 
@@ -36,4 +39,4 @@ option:
   custom: False
 
 version:
-  best: v3
+  best: v0-infer
