@@ -20,4 +20,4 @@ def aug_img_df(Annotpath):
     aug_df = pd.DataFrame(aug_list, columns = column_name)
     return aug_df
 
-# print(aug_img_df("aug"))
+print(aug_img_df("aug"))

@@ -38,6 +38,7 @@ import yaml,shutil
 from tqdm import tqdm
 
 from helper.custom_evaluate import *
+# from helper.txt_to_df import *
 
 if len(sys.argv) != 3:
     sys.stderr.write('Arguments error. Usage:\n')
@@ -73,6 +74,27 @@ def creatingInfoData(Annotpath):
     return xml_df
 
 
+def aug_img_df(Annotpath):
+    aug_list = []
+    for files in sorted(glob.glob(str(Annotpath+'/*.txt*'))):
+        with open(files, "r") as f:
+            bbox = (f.read()).split('\n')
+        for data in bbox[0:-1]:
+            data = data.split()
+            value = (
+                float(data[0]),
+                float(data[1]),
+                float(data[2]),
+                float(data[3]),
+                files.split(".")[0],
+                "person",
+            )
+            aug_list.append(value)
+    column_name = ['xmin', 'ymin', 'xmax', 'ymax', 'name', 'label']
+    aug_df = pd.DataFrame(aug_list, columns = column_name)
+    return aug_df
+
+
 def custom_dataset_function_train():
     # file_name, height, width, image_id
     #[{'file_name': '/home/samjith/0000180.jpg', 'height': 788, 'width': 1400, 'image_id': 1, 
@@ -81,8 +103,13 @@ def custom_dataset_function_train():
 
     annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","train/Annotations")
     img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","train/Images")
+    aug_annot_path = os.path.join("data/augmented",f"v{params['ingest']['dcount']}","Annotations")
+    aug_img_path = os.path.join("data/augmented",f"v{params['ingest']['dcount']}","Images")
 
-    dataframe = creatingInfoData(annot_path)
+    df1 = creatingInfoData(annot_path)
+    df2 = aug_img_df(aug_annot_path)
+    # dataframe = pd.concat([df1,df2])
+    dataframe = df1
     
     old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
     annotations = []

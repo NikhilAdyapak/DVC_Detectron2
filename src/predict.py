@@ -173,7 +173,7 @@ def predict():
     
     gt_df = creatingInfoData(annot_path)
     gt_df["name"] = [x["name"].split("/")[-1] for index,x in gt_df.iterrows()]
-    print(gt_df)
+    # print(gt_df)
 
     metrics = {"TP":0,"FP":0,"FN":0,"IOU":[]}
 

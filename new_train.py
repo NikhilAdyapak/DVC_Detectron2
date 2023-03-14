@@ -230,3 +230,29 @@ for d in random.sample(dataset_dicts, 10):
     cv2.imshow("output",out.get_image()[:, :, ::-1])
     cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+# import os, glob, pandas as pd, yaml
+
+# def aug_img_df(Annotpath):
+#     aug_list = []
+#     for files in sorted(glob.glob(str(Annotpath+'/*.txt*'))):
+#         with open(files, "r") as f:
+#             bbox = (f.read()).split('\n')
+#         for data in bbox[0:-1]:
+#             data = data.split()
+#             value = (
+#                 float(data[0]),
+#                 float(data[1]),
+#                 float(data[2]),
+#                 float(data[3]),
+#                 files.split(".")[0],
+#                 "person",
+#             )
+#             aug_list.append(value)
+#     column_name = ['xmin', 'ymin', 'xmax', 'ymax', 'name', 'label']
+#     aug_df = pd.DataFrame(aug_list, columns = column_name)
+#     return aug_df
+
+# params = yaml.safe_load(open('params.yaml'))
+
+# print(aug_img_df(os.path.join("data/augmented",f"v{params['ingest']['dcount']}","Annotations")))

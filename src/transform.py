@@ -49,15 +49,15 @@ if __name__ == "__main__":
 
     annot_path_train = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}","train","Annotations")
 
-    # annot_path_aug = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}","Annotations")
+    annot_path_aug = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}","Annotations")
 
     annot_path_val = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}","val","Annotations")
 
     train_output_annot = creatingInfoData(annot_path_train)
-    # aug_output_annot = aug_img_df(annot_path_aug)
+    aug_output_annot = aug_img_df(annot_path_aug)
 
-    # df_train = pd.concat([train_output_annot,aug_output_annot])
-    df_train = train_output_annot
+    df_train = pd.concat([train_output_annot,aug_output_annot])
+    # df_train = train_output_annot
     df_val = creatingInfoData(annot_path_val)
 
     print("-------------------------------")
@@ -77,7 +77,7 @@ if __name__ == "__main__":
             fp.write("%s\n" % item)
         print('Done')
     
-    labels = ["person","person-like","orange","brocolli","cat"]
+    labels = ["person"]
     with open(os.path.join(output_transform,'labels.txt'), 'w') as fp:
         for item in labels:
             fp.write("%s\n" % item)

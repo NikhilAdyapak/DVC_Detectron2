@@ -18,13 +18,13 @@ stages:
     cmd: python3 src/predict.py data/train data/transform data/predict
     deps:
     - path: data/train
-      md5: 18aad2987b510cd4e382eab11fcb4529.dir
-      size: 835372928
+      md5: acf7b3dc60e08d14ef9bdbc56c6552be.dir
+      size: 835370608
       nfiles: 8
     - path: data/transform
-      md5: f2f5abad8481d79bcf5fdee5af5b3339.dir
-      size: 659089
-      nfiles: 7
+      md5: aed5f60e71eb020eb3895dc60dc4154d.dir
+      size: 429260
+      nfiles: 5
     - path: src/predict.py
       md5: b23f2857a7381e7eba99a63ae711c807
       size: 8034
@@ -33,27 +33,31 @@ stages:
         ingest.dcount: 3
     outs:
     - path: data/predict
-      md5: 9da31167e6da86132a1d5fcd05a9979c.dir
+      md5: 74a028c692558d5547bae835e4f1e26f.dir
       size: 847
       nfiles: 2
   transform:
     cmd: python3 src/transform.py data/augmented data/split data/transform
     deps:
+    - path: data/augmented
+      md5: eecfb8bedd47740c1da8c05135c27478.dir
+      size: 76167229
+      nfiles: 1982
     - path: data/split
       md5: 54eb0133ea205bae31bd93ed95b82294.dir
       size: 165196292
       nfiles: 2208
     - path: src/transform.py
-      md5: 6eb4169fedbdd18522e78333e2666dff
-      size: 4134
+      md5: 16b2aa89119e518d231ad6d439364f18
+      size: 4199
     params:
       params.yaml:
         ingest.dcount: 3
     outs:
     - path: data/transform
-      md5: f2f5abad8481d79bcf5fdee5af5b3339.dir
-      size: 659089
-      nfiles: 7
+      md5: aed5f60e71eb020eb3895dc60dc4154d.dir
+      size: 429260
+      nfiles: 5
   evaluate:
     cmd: python3 src/evaluate.py data/prepared data/transformed data/predictions data/evaluated
       data/store
@@ -82,8 +86,8 @@ stages:
     cmd: python3 src/augment.py data/split data/augmented
     deps:
     - path: data/split
-      md5: 04ab9239865757791297b5ef272ae14c.dir
-      size: 165199604
+      md5: 54eb0133ea205bae31bd93ed95b82294.dir
+      size: 165196292
       nfiles: 2208
     - path: src/augment.py
       md5: dc41adac0174ec962232b4fd9185678c
@@ -93,8 +97,8 @@ stages:
         ingest.dcount: 3
     outs:
     - path: data/augmented
-      md5: a78e9f7aea074d65d83c653997e3801b.dir
-      size: 76696097
+      md5: eecfb8bedd47740c1da8c05135c27478.dir
+      size: 76167229
       nfiles: 1982
   split:
     cmd: python3 src/split.py data/prepared data/split
@@ -118,27 +122,27 @@ stages:
     cmd: python3 src/train.py data/transform data/train
     deps:
     - path: data/transform
-      md5: f2f5abad8481d79bcf5fdee5af5b3339.dir
-      size: 659089
-      nfiles: 7
+      md5: aed5f60e71eb020eb3895dc60dc4154d.dir
+      size: 429260
+      nfiles: 5
     - path: src/train.py
-      md5: 419dc95cd060af9b05dc903a920d65e7
-      size: 9420
+      md5: 36f52dca85000e459371297644ae926d
+      size: 10392
     params:
       params.yaml:
         ingest.dcount: 3
     outs:
     - path: data/train
-      md5: ca84318f6757ab4652ddcc4870b04855.dir
-      size: 835254188
+      md5: 5dc336decf0260b852a2d3f548ab5aad.dir
+      size: 835254264
       nfiles: 4
   infer:
     cmd: python3 src/infer.py data/transform data/infer
     deps:
     - path: data/transform
-      md5: f2f5abad8481d79bcf5fdee5af5b3339.dir
-      size: 659089
-      nfiles: 7
+      md5: aed5f60e71eb020eb3895dc60dc4154d.dir
+      size: 429260
+      nfiles: 5
     - path: src/infer.py
       md5: 5b77d4f31d4e91bcb4667a07e5cf6cc3
       size: 8760
@@ -147,7 +151,7 @@ stages:
         ingest.dcount: 3
     outs:
     - path: data/infer
-      md5: 3e7b3e006bae470b5f477139f4cb829b.dir
+      md5: 840a58ce74e80fe03a17c86aedcdc63a.dir
       size: 168224
       nfiles: 6
   exit:
@@ -176,11 +180,11 @@ stages:
     cmd: python3 src/compare.py data/infer data/predict data/store
     deps:
     - path: data/infer
-      md5: 3e7b3e006bae470b5f477139f4cb829b.dir
+      md5: 840a58ce74e80fe03a17c86aedcdc63a.dir
       size: 168224
       nfiles: 6
     - path: data/predict
-      md5: 9da31167e6da86132a1d5fcd05a9979c.dir
+      md5: 74a028c692558d5547bae835e4f1e26f.dir
       size: 847
       nfiles: 2
     - path: src/compare.py
