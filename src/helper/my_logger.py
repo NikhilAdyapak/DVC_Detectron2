@@ -1,6 +1,25 @@
 import os,json
 
-def results_logger(det_metrics,my_metrics,path,params):
+
+def metrics_dict(metrics,det_metrics):
+    final_metrics = {
+        "tp" : metrics["TP"],
+        "fp" : metrics["FP"],
+        "fn" : metrics["FN"],
+        "Precision" : metrics["Precision"],
+        "Recall" : metrics["Recall"],
+        "F1" : metrics["F1"],
+        "Avg_IOU" : metrics["Avg_IOU"],
+        'AP': det_metrics["AP"],
+        'AP50': det_metrics["AP50"],
+        'AP75': det_metrics["AP75"],
+        'APs': det_metrics['APs'],
+        'APm': det_metrics['APm'],
+        'APl': det_metrics['APl']
+    }
+    return final_metrics
+
+def results_logger(det_metrics,my_metrics,det_metrics_val,my_metrics_val,path,params):
     
     hyper_parameters = {
         "config_file" : params['detectron_parameters']['config_file'],
@@ -16,24 +35,14 @@ def results_logger(det_metrics,my_metrics,path,params):
         "SCORE_THRESH_TEST" : params['detectron_parameters']['SCORE_THRESH_TEST']
     }
 
-    metrics = {
-        "tp" : my_metrics["TP"],
-        "fp" : my_metrics["FP"],
-        "fn" : my_metrics["FN"],
-        "Precision" : my_metrics["Precision"],
-        "Recall" : my_metrics["Recall"],
-        "F1" : my_metrics["F1"],
-        "Avg_IOU" : my_metrics["Avg_IOU"],
-        'AP': det_metrics["AP"],
-        'AP50': det_metrics["AP50"],
-        'AP75': det_metrics["AP75"],
-        'APs': det_metrics['APs'],
-        'APm': det_metrics['APm'],
-        'APl': det_metrics['APl']
-    }
+    local_val_metrics = metrics_dict(my_metrics,det_metrics)
+    master_val_metrics = metrics_dict(my_metrics_val,det_metrics_val)
 
     with open(os.path.join(path,'det2_hyperparamters_{}.json'.format(params['ingest']['dcount'])), 'w') as fout:
         fout.write(json.dumps(hyper_parameters, indent = len(hyper_parameters)))
 
-    with open(os.path.join(path,'metrics_{}.json'.format(params['ingest']['dcount'])), 'w') as fout:
-        fout.write(json.dumps(metrics, indent = len(metrics)))
+    with open(os.path.join(path,'local_metrics_{}.json'.format(params['ingest']['dcount'])), 'w') as fout:
+        fout.write(json.dumps(local_val_metrics, indent = len(local_val_metrics)))
+
+    with open(os.path.join(path,'global_metrics_{}.json'.format(params['ingest']['dcount'])), 'w') as fout:
+        fout.write(json.dumps(master_val_metrics, indent = len(master_val_metrics)))

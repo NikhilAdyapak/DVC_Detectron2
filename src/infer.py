@@ -56,6 +56,7 @@ output_infer = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
 os.makedirs(output_infer, exist_ok = True)
 annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
 img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images")
+val_path = params['validation']['path']
 
 
 def creatingInfoData(Annotpath):
@@ -95,6 +96,54 @@ def custom_dataset_function_test():
     dataset = []
     for index,row in dataframe.iterrows():
         fname = os.path.join(img_path, row["name"].split('.')[0] + ".jpg")
+        xmin = row["xmin"]
+        ymin = row["ymin"]
+        xmax = row["xmax"]
+        ymax = row["ymax"]
+        if old_fname != fname:
+            img = cv2.imread(old_fname)
+            dataset.append(
+                        {"file_name":old_fname , 
+                        "height":img.shape[0], 
+                        "width":img.shape[1],
+                        "image_id":re.findall(r'\d+', old_fname)[0],
+                        "annotations":annotations})
+            annotations = []
+        annotations.append(
+            {"bbox":[xmin,ymin,xmax,ymax],
+            'bbox_mode': 0, 
+            'area': (xmax - xmin) * (ymax - ymin), 
+            'segmentation': [],
+            'category_id':0})
+        old_fname = fname
+
+    img = cv2.imread(old_fname)
+    dataset.append(
+                        {"file_name":old_fname , 
+                        "height":img.shape[0], 
+                        "width":img.shape[1],
+                        "image_id":re.findall(r'\d+', old_fname)[0],
+                        "annotations":annotations})
+
+    return dataset
+
+
+def custom_dataset_function_val():
+    # file_name, height, width, image_id
+    #[{'file_name': '/home/samjith/0000180.jpg', 'height': 788, 'width': 1400, 'image_id': 1, 
+    #   'annotations': [{'bbox': [250.0, 675.0, 23.0, 17.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 391.0, 'segmentation': [],
+    #        'category_id': 0}, {'bbox': [295.0, 550.0, 21.0, 20.0], 'bbox_mode': <BoxMode.XYWH_ABS: 1>, 'area': 420.0, 'segmentation': [], 'category_id': 0},..
+
+    annot_path = os.path.join(val_path,"Annotations")
+    img_path = os.path.join(val_path,"Images")
+    
+    dataframe = creatingInfoData(annot_path)
+
+    old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    annotations = []
+    dataset = []
+    for index,row in dataframe.iterrows():
+        fname = os.path.join(img_path, row["name"]) + ".jpg"
         xmin = row["xmin"]
         ymin = row["ymin"]
         xmax = row["xmax"]
@@ -183,10 +232,12 @@ def detectron_custom_infer():
     # det_metrics = {'AP':0,'AP50':0,'AP75':0,'APs':0}
     # s1 = json.dumps(d)
     # results = json.loads(s1)
+
+    annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
     
     gt_df = creatingInfoData(annot_path)
     gt_df["name"] = [x["name"].split("/")[-1] for index,x in gt_df.iterrows()]
-    print(gt_df)
+    # print(gt_df)
 
     metrics = {"TP":0,"FP":0,"FN":0,"IOU":[]}
 
@@ -204,9 +255,39 @@ def detectron_custom_infer():
             metrics = iou_mapping(box,gt_boxes,metrics)
 
     my_metrics = evaluate(metrics)
-    results_logger(det_metrics,my_metrics,output_infer,params)
 
+    # Master Validation for compare
 
+    DatasetCatalog.register("master_dataset_val", custom_dataset_function_val)
+    MetadataCatalog.get("master_dataset_val").set(thing_classes = ["person"])
+
+    predictor = DefaultPredictor(cfg)
+    evaluator = COCOEvaluator("master_dataset_val", cfg, False, output_dir = output_infer)
+    val_loader = build_detection_test_loader(cfg, "master_dataset_val")
+    eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
+
+    d1 = next(iter(eval_results.items()))
+    d2 = next(iter(eval_results.values()))
+    det_metrics_val = {'AP':d2["AP"],'AP50':d2["AP50"],'AP75':d2["AP75"],'APs':d2['APs'],'APm':d2['APm'],'APl':d2['APl']}
+
+    annot_path = os.path.join(val_path,"Annotations")
+    img_path_val = os.path.join(val_path,"Images")
+    for filename in tqdm(os.listdir(annot_path)):
+        img = os.path.join(img_path_val, filename).replace("xml","jpg")
+        img = cv2.imread(img)
+        outputs = predictor(img)
+        v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
+        boxes = v._convert_boxes(outputs["instances"].pred_boxes.to('cpu'))
+        gt_df_sub = gt_df[gt_df["name"] == filename.split(".")[0]]
+        gt_boxes = []
+        for index, row in gt_df_sub.iterrows():
+            gt_boxes.append([row["xmin"],row["ymin"],row["xmax"],row["ymax"]])
+        for box in boxes:
+            metrics = iou_mapping(box,gt_boxes,metrics)
+
+    my_metrics_val = evaluate(metrics)
+
+    results_logger(det_metrics,my_metrics,det_metrics_val,my_metrics_val,output_infer,params)
 
 
 if __name__ == "__main__":
