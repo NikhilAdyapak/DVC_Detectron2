@@ -129,6 +129,11 @@ def main():
     #Augmentations
     augmentation(image_path,annot_path,xml_dataframe,output_image_path,output_annot_path)
     
+    print("\n\n\n")
+    print("-------------------------------")
+    print("Augmenting Completed....")
+    print("-------------------------------")
+    print("\n\n\n")
 
 if __name__ == "__main__":
     main()

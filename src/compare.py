@@ -77,12 +77,16 @@ if __name__ == "__main__":
     f2 = open (metrics_new_path, "r")
     metrics_new = json.loads(f2.read())
 
+    print("\n\n\n")
     print("-------------------------------")
     print("Comparing.....")
     print("-------------------------------")
+    print("\n\n\n")
 
     compare(metrics_best, metrics_new, infer_flag)
 
+    print("\n\n\n")
     print("-------------------------------")
     print("Comparing Completed.....")
     print("-------------------------------")
+    print("\n\n\n")

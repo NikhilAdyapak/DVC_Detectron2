@@ -250,9 +250,11 @@ def detectron_custom_train():
 
 if __name__ == "__main__":
 
+    print("\n\n\n")
     print("-------------------------------")
     print("Training.....")
     print("-------------------------------")
+    print("\n\n\n")
 
     detectron_custom_train()
     print("\n\n\n")

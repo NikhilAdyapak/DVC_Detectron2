@@ -10,9 +10,12 @@ if len(sys.argv) != 4:
     sys.exit(1)
 
 params = yaml.safe_load(open('params.yaml'))
+
+print("\n\n\n")
 print("-------------------------------")
 print("Exiting.....")
 print("-------------------------------")
+print("\n\n\n")
 
 datastore = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
 pred = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
@@ -22,4 +25,4 @@ copy_tree(pred, datastore)
 copy_tree(infer, datastore)
 
 print(datastore)
-print("\n\n\nDone-------------\n\n\n")
+print("\n\n\nPipeline Executed-------------\n\n\n")

@@ -278,12 +278,16 @@ def predict():
 
 if __name__ == "__main__":
 
+    print("\n\n\n")
     print("-------------------------------")
     print("Predicting.....")
     print("-------------------------------")
+    print("\n\n\n")
 
     predict()
 
+    print("\n\n\n")
     print("-------------------------------")
     print("Predicting Completed.....")
     print("-------------------------------")
+    print("\n\n\n")

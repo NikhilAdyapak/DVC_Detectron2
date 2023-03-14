@@ -291,14 +291,20 @@ def detectron_custom_infer():
 
 
 if __name__ == "__main__":
+
+    print("\n\n\n")
     print("-------------------------------")
     print("Inferencing.....")
     print("-------------------------------")
+    print("\n\n\n")
+
     detectron_custom_infer()
+
     print("\n\n\n")
     print("-------------------------------")
     print("Inferencing Completed.....")
     print("-------------------------------")
+    print("\n\n\n")
 
 
     # df = pd.read_pickle(file_name)

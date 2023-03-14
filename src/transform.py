@@ -33,7 +33,7 @@ def creatingInfoData(Annotpath):
                      int(member[4][2].text),
                      int(member[4][3].text),
                      os.path.join(Annotpath,file_name),
-                     member[0].text,
+                     "person",
                      )
             xml_list.append(value)
     column_name = ['xmin', 'ymin', 'xmax', 'ymax', 'name', 'label']
@@ -60,9 +60,11 @@ if __name__ == "__main__":
     # df_train = train_output_annot
     df_val = creatingInfoData(annot_path_val)
 
+    print("\n\n\n")
     print("-------------------------------")
     print("Tranforming.....")
     print("-------------------------------")
+    print("\n\n\n")
 
     df_train.to_pickle(os.path.join(output_transform,'v{}_train.pkl'.format(params['ingest']['dcount'])))
     df_val.to_pickle(os.path.join(output_transform,'v{}_val.pkl'.format(params['ingest']['dcount'])))
@@ -99,9 +101,13 @@ if __name__ == "__main__":
 
     # os.system(cmd_train)
     # os.system(cmd_val)
+
+    print("\n\n\n")
     print("-------------------------------")
     print("Tranforming Done....")
     print("-------------------------------")
+    print("\n\n\n")
+    
     # os.system(cmd_test)
 
     # register_coco_instances("my_dataset_train", {}, "/home/yln1kor/Dataset/karthika95/Train/_annotations.coco.json", "/home/yln1kor/Dataset/karthika95/Train")

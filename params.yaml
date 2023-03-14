@@ -40,3 +40,6 @@ option:
 
 version:
   best: v0-infer
+
+latest-run:
+  folder: /home/yln1kor/Blob/Dummy/

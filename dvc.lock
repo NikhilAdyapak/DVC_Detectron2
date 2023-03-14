@@ -4,16 +4,16 @@ stages:
     cmd: python3 src/ingest.py data/prepared
     deps:
     - path: src/ingest.py
-      md5: bf63982170ea853c2316ff71336df5f0
-      size: 674
+      md5: fc159e6063099dfb9d470bbd7cdc1024
+      size: 723
     params:
       params.yaml:
         ingest.dcount: 3
     outs:
     - path: data/prepared
-      md5: abe55d8bdad6672b65112934b945e653.dir
-      size: 165196292
-      nfiles: 2208
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
   predict:
     cmd: python3 src/predict.py data/train data/transform data/predict
     deps:

@@ -52,11 +52,21 @@ def main():
     # print(infer_batch)
     # print(train_batch)
     os.makedirs(outputsplit, exist_ok = True)
+
+    print("\n\n\n")
     print("-------------------------------")
     print("Splitting.....")
     print("-------------------------------")
+    print("\n\n\n")
+
     splitfolders.ratio(input_path, output = outputsplit, ratio = (train_batch, infer_batch), group_prefix = None, move = False)
 
+    print("\n\n\n")
+    print("-------------------------------")
+    print("Splitting Completed....")
+    print("-------------------------------")
+    print("\n\n\n")
 
+    
 if __name__ == '__main__':
     main()
