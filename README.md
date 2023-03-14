@@ -1,8 +1,8 @@
 # Pedestrian Detection & Segmentation MLOps Pipeline
 
-## DVC pipeline for Pedestrian Detection & Segmentation using YoloV5 with Data Versioning
+## DVC pipeline for Pedestrian Detection & Segmentation using Detectron2 with Data Versioning
 
-<img src="screenshots/pipe.png" alt="Pipeline screenshot" title="DVC Pipeline" height="390">
+<img src="screenshots/detectron2_dvc_dag.png" alt="Pipeline screenshot" title="DVC Pipeline" height="390">
 
 <br/>
 
