@@ -232,7 +232,32 @@ for d in random.sample(dataset_dicts, 10):
 cv2.destroyAllWindows()
 
 # import os, glob, pandas as pd, yaml
+# import os, json, cv2, random, glob
+# import re
+# import xml.etree.ElementTree as ET
+# import pandas as pd
 
+# def creatingInfoData(Annotpath):
+#     xml_list = []
+#     for xml_file in sorted(glob.glob(str(Annotpath+'/*.xml*'))):
+#         tree = ET.parse(xml_file)
+#         root = tree.getroot()
+#         for member in root.findall('object'):
+#             file_name = xml_file.split('/')[-1][0:-4]
+#             value = (
+#                      int(member[4][0].text),
+#                      int(member[4][1].text),
+#                      int(member[4][2].text),
+#                      int(member[4][3].text),
+#                      file_name,
+#                      "person",
+#                      )
+#             xml_list.append(value)
+#     column_name = ['xmin', 'ymin', 'xmax', 'ymax', 'name', 'label']
+#     xml_df = pd.DataFrame(xml_list, columns = column_name)
+#     return xml_df
+
+    
 # def aug_img_df(Annotpath):
 #     aug_list = []
 #     for files in sorted(glob.glob(str(Annotpath+'/*.txt*'))):
@@ -253,6 +278,9 @@ cv2.destroyAllWindows()
 #     aug_df = pd.DataFrame(aug_list, columns = column_name)
 #     return aug_df
 
+
 # params = yaml.safe_load(open('params.yaml'))
 
-# print(aug_img_df(os.path.join("data/augmented",f"v{params['ingest']['dcount']}","Annotations")))
+# # print(aug_img_df(os.path.join("data/augmented",f"v{params['ingest']['dcount']}","Annotations")))
+# val_path = params['validation']['path']
+# print(creatingInfoData(os.path.join(val_path,"Annotations")))
