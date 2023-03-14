@@ -14,3 +14,7 @@ archive/
 try.py
 
 img.txt
+
+metrics.json
+
+model_final.pth
