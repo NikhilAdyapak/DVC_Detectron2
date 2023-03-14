@@ -2,7 +2,9 @@
 
 ## DVC pipeline for Pedestrian Detection & Segmentation using Detectron2 with Data Versioning
 
-<img src="screenshots/detectron2_dvc_dag.png" alt="Pipeline screenshot" title="DVC Pipeline" height="500">
+<p align="center">
+    <img src="screenshots/detectron2_dvc_dag.png" alt="Pipeline screenshot" title="DVC Pipeline" height="500">
+</p>
 
 <br/>
 
