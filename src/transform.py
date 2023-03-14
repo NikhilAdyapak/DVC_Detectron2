@@ -99,7 +99,9 @@ if __name__ == "__main__":
 
     # os.system(cmd_train)
     # os.system(cmd_val)
-    print("Yaaay")
+    print("-------------------------------")
+    print("Tranforming Done....")
+    print("-------------------------------")
     # os.system(cmd_test)
 
     # register_coco_instances("my_dataset_train", {}, "/home/yln1kor/Dataset/karthika95/Train/_annotations.coco.json", "/home/yln1kor/Dataset/karthika95/Train")
