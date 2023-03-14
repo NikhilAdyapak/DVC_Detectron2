@@ -97,8 +97,8 @@ if __name__ == "__main__":
     cmd_train = "python3 src/helper/voc2coco.py --ann_dir " + annot_path_train + " --ann_ids " + os.path.join(output_transform,'train_ids.txt') + " --labels "+ os.path.join(output_transform,'labels.txt') + " --output " + os.path.join(output_transform,"_annotations_train.coco.json")
     cmd_val = "python3 src/helper/voc2coco.py --ann_dir " + annot_path_val + " --ann_ids " + os.path.join(output_transform,'val_ids.txt') + " --labels "+ os.path.join(output_transform,'labels.txt') + " --output " + os.path.join(output_transform,"_annotations_val.coco.json")
 
-    os.system(cmd_train)
-    os.system(cmd_val)
+    # os.system(cmd_train)
+    # os.system(cmd_val)
     print("Yaaay")
     # os.system(cmd_test)
 
