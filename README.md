@@ -22,10 +22,22 @@ dvc init
 ```
 
 ## 3. Installing dependencies
-To install requirements for running object detection pipeline with YoloV5
+To install requirements for running object detection pipeline with Detectron2
 Requires PyTorch, CUDA(if GPU Enabled)
 ```shell
 pip3 install -r requirements.txt
+
+Detectron2 Dependencies
+python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
+# (add --user if you don't have permission)
+
+# Or, to install it from a local clone:
+git clone https://github.com/facebookresearch/detectron2.git
+python -m pip install -e detectron2
+
+# On macOS, you may need to prepend the above commands with a few environment variables:
+CC=clang CXX=clang++ ARCHFLAGS="-arch x86_64" python -m pip install ...
+
 ````
 
 ## 4. Setting paramenters
@@ -36,14 +48,14 @@ ingest:
     dcount:0
 ```
 
-### 5. To run DVC pipeline
+## 5. Pipeline DAG
 ```shell
-dvc repro
+dvc dag
 ```
 
-## 6. To run Streamlit App
+### 6. To run DVC pipeline
 ```shell
-streamlit run main.py
+dvc repro
 ```
 
 ## 7. Adding pipeline stage
@@ -54,17 +66,4 @@ dvc run -n <Stage_name>
     -d src/<Stage_file>.py -d <Any dependencies>
     -o data/<Output dir> 
     python3 src/prepare.py
-```
-
-## 8. Pipeline DAG
-```shell
-dvc dag
-```
-
-## 9. Push results/outputs to AWS S3
-Create .streamlit/secrets.toml file and add your AWS S3 BUCKET ACCESS_KEY and SECRET_KEY
-
-```
-ACCESS_KEY = 'xxxxxxx'
-SECRET_KEY = 'xxxxxxxxxxxxxx'
 ```
