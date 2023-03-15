@@ -1,45 +1,33 @@
 dataset:
-  path: archive # Put path to dataset here
-  name : Kar95
-  
-# Datatset
-# --Images
-# --Annotations
-
-validation:
-  path: Val
-
-ingest:
-  dcount: 3
-
-split:
-  val : 0.1
-  train : 0.9
-
+  name: Kar95
+  path: archive
 detectron_parameters:
-  config_file: COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml
-  NUM_WORKERS: 4
-  IMS_PER_BATCH: 4
   BASE_LR: 0.001
-  WARM_UP_ITERS: 500
-  MAX_ITER: 800
-  GAMMA: 0.05
   BATCH_SIZE_PER_IMAGE: 64
-  NUM_CLASSES: 1
   EVAL_PERIOD: 500
+  GAMMA: 0.05
+  IMS_PER_BATCH: 4
+  MAX_ITER: 800
+  NUM_CLASSES: 1
+  NUM_WORKERS: 4
   SCORE_THRESH_TEST: 0.85
-
-output:
-  model: output/model_final.pth
-  results: results/
-  base_dir: output/
-  results_pretrained: pretrained_results/
-
-option:
-  custom: False
-
-version:
-  best: v0-infer
-
+  WARM_UP_ITERS: 500
+  config_file: COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml
+ingest:
+  dcount: 4
 latest-run:
   folder: /home/yln1kor/Blob/Dummy/
+option:
+  custom: false
+output:
+  base_dir: output/
+  model: output/model_final.pth
+  results: results/
+  results_pretrained: pretrained_results/
+split:
+  train: 0.9
+  val: 0.1
+validation:
+  path: Val
+version:
+  best: v3
