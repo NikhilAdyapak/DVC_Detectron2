@@ -49,11 +49,22 @@ python -m pip install detectron2 -f \
 ````
 
 ## 4. Setting paramenters
-Here dcount is the number of versions of datasets uploaded(dcount = 0 when initialised)
+Here dcount is the number of versions of datasets uploaded(dcount = 1 when initialised)
 ```
 # file params.yaml
 ingest:
     dcount:0
+
+dataset:
+    path:
+
+ // Dataset - 
+    --Images
+    --Annotations
+
+detectron_parameters:
+    NUM_DATA_LOADERS:
+    hyperparameters...
 ```
 
 ## 5. Pipeline DAG
