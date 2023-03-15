@@ -225,21 +225,26 @@ def detectron_custom_train():
     my_dataset_train_metadata = MetadataCatalog.get("my_dataset_train")
     dataset_dicts = DatasetCatalog.get("my_dataset_train")
 
-    for d in random.sample(dataset_dicts, 3):
-        img = cv2.imread(d["file_name"])
-        visualizer = Visualizer(img[:, :, ::-1], metadata=my_dataset_train_metadata, scale=0.5)
-        vis = visualizer.draw_dataset_dict(d)
-        cv2.imshow("out",vis.get_image()[:, :, ::-1])
-        cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # for d in random.sample(dataset_dicts, 3):
+    #     img = cv2.imread(d["file_name"])
+    #     visualizer = Visualizer(img[:, :, ::-1], metadata=my_dataset_train_metadata, scale=0.5)
+    #     vis = visualizer.draw_dataset_dict(d)
+    #     cv2.imshow("out",vis.get_image()[:, :, ::-1])
+    #     cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     cfg = get_cfg()
+    # cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(params["detectron_parameters"]["config_file"])
     cfg.merge_from_file(model_zoo.get_config_file(params["detectron_parameters"]["config_file"]))
+    if params['version']['best'] == "v0-infer" or params['version']['best'] == "VD":
+        cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(params["detectron_parameters"]["config_file"])
+    else:
+        # cfg.MODEL.WEIGHTS = os.path.join(sys.argv[2],params['version']['best'],"model_final.pth")
+        cfg.MODEL.WEIGHTS = os.path.join("runs/train/expt{}".format((params['version']['best'])[1]),"weights/model_final.pth")
+
     cfg.DATASETS.TRAIN = ("my_dataset_train",)
     cfg.DATASETS.TEST = ("my_dataset_val",)
-
     cfg.DATALOADER.NUM_WORKERS = params["detectron_parameters"]["NUM_WORKERS"]
-    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(params["detectron_parameters"]["config_file"])
     cfg.SOLVER.IMS_PER_BATCH = params["detectron_parameters"]["IMS_PER_BATCH"]
     cfg.SOLVER.BASE_LR = params["detectron_parameters"]["BASE_LR"]
     cfg.SOLVER.WARMUP_ITERS = params["detectron_parameters"]["WARM_UP_ITERS"]
