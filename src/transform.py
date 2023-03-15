@@ -56,8 +56,9 @@ if __name__ == "__main__":
     train_output_annot = creatingInfoData(annot_path_train)
     aug_output_annot = aug_img_df(annot_path_aug)
 
-    df_train = pd.concat([train_output_annot,aug_output_annot])
-    # df_train = train_output_annot
+    # df_train = pd.concat([train_output_annot,aug_output_annot])
+    df_train = train_output_annot
+    # print(df_train)
     df_val = creatingInfoData(annot_path_val)
 
     print("\n\n\n")

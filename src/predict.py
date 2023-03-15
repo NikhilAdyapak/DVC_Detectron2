@@ -88,13 +88,18 @@ def custom_dataset_function_test():
     annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
     img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images")
     
-    dataframe = creatingInfoData(annot_path)
-
-    old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    # dataframe = creatingInfoData(annot_path)
+    dataframe = pd.read_pickle(os.path.join(transform_path,"v{}_val.pkl".format(params['ingest']['dcount'])))
+    dataframe["name"] = [x.replace("Annotations","Images") for x in dataframe["name"]]
+    # print(dataframe)
+    
+    # old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    old_fname = os.path.join(dataframe["name"][0]) + ".jpg"
     annotations = []
     dataset = []
     for index,row in dataframe.iterrows():
-        fname = os.path.join(img_path, row["name"]) + ".jpg"
+        # fname = os.path.join(img_path, row["name"]) + ".jpg"
+        fname = os.path.join(row["name"]) + ".jpg"
         xmin = row["xmin"]
         ymin = row["ymin"]
         xmax = row["xmax"]

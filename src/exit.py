@@ -24,5 +24,11 @@ infer = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}")
 copy_tree(pred, datastore)
 copy_tree(infer, datastore)
 
+dcount = params['ingest']['dcount'] + 1
+params.pop("ingest")
+params.update({"ingest":{"dcount":dcount}})
+with open('params.yaml', 'w') as file:
+    outputs = yaml.dump(params, file)
+
 print(datastore)
 print("\n\n\nPipeline Executed-------------\n\n\n")

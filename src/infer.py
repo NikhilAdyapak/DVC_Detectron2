@@ -88,14 +88,19 @@ def custom_dataset_function_test():
 
     annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
     img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images")
-
-    dataframe = creatingInfoData(annot_path)
-
-    old_fname = os.path.join(img_path, dataframe["name"][0].split('.')[0] + ".jpg")
+    
+    # dataframe = creatingInfoData(annot_path)
+    dataframe = pd.read_pickle(os.path.join(transform_path,"v{}_val.pkl".format(params['ingest']['dcount'])))
+    dataframe["name"] = [x.replace("Annotations","Images") for x in dataframe["name"]]
+    # print(dataframe)
+    
+    # old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    old_fname = os.path.join(dataframe["name"][0]) + ".jpg"
     annotations = []
     dataset = []
     for index,row in dataframe.iterrows():
-        fname = os.path.join(img_path, row["name"].split('.')[0] + ".jpg")
+        # fname = os.path.join(img_path, row["name"]) + ".jpg"
+        fname = os.path.join(row["name"]) + ".jpg"
         xmin = row["xmin"]
         ymin = row["ymin"]
         xmax = row["xmax"]
@@ -224,7 +229,7 @@ def detectron_custom_infer():
     evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir = output_infer)
     val_loader = build_detection_test_loader(cfg, "my_dataset_val")
     eval_results = inference_on_dataset(predictor.model, val_loader, evaluator)
-    print(eval_results)
+    # print(eval_results)
 
     d1 = next(iter(eval_results.items()))
     d2 = next(iter(eval_results.values()))

@@ -106,16 +106,21 @@ def custom_dataset_function_train():
     aug_annot_path = os.path.join("data/augmented",f"v{params['ingest']['dcount']}","Annotations")
     aug_img_path = os.path.join("data/augmented",f"v{params['ingest']['dcount']}","Images")
 
-    df1 = creatingInfoData(annot_path)
+    # df1 = creatingInfoData(annot_path)
+    df1 = pd.read_pickle(os.path.join(transform_path,"v{}_train.pkl".format(params['ingest']['dcount'])))
     df2 = aug_img_df(aug_annot_path)
     # dataframe = pd.concat([df1,df2])
     dataframe = df1
+    dataframe["name"] = [x.replace("Annotations","Images") for x in dataframe["name"]]
+    # print(df1)
     
-    old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    # old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    old_fname = os.path.join(dataframe["name"][0]) + ".jpg"
     annotations = []
     dataset = []
     for index,row in dataframe.iterrows():
-        fname = os.path.join(img_path, row["name"]) + ".jpg"
+        # fname = os.path.join(img_path, row["name"]) + ".jpg"
+        fname = os.path.join(row["name"]) + ".jpg"
         xmin = row["xmin"]
         ymin = row["ymin"]
         xmax = row["xmax"]
@@ -147,7 +152,6 @@ def custom_dataset_function_train():
                         "width":img.shape[1],
                         "image_id":re.findall(r'\d+', old_fname)[0],
                         "annotations":annotations})
-
     return dataset
 
 
@@ -160,13 +164,18 @@ def custom_dataset_function_test():
     annot_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Annotations")
     img_path = os.path.join("data/split",f"v{params['ingest']['dcount']}","val/Images")
     
-    dataframe = creatingInfoData(annot_path)
-
-    old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    # dataframe = creatingInfoData(annot_path)
+    dataframe = pd.read_pickle(os.path.join(transform_path,"v{}_val.pkl".format(params['ingest']['dcount'])))
+    dataframe["name"] = [x.replace("Annotations","Images") for x in dataframe["name"]]
+    # print(dataframe)
+    
+    # old_fname = os.path.join(img_path, dataframe["name"][0]) + ".jpg"
+    old_fname = os.path.join(dataframe["name"][0]) + ".jpg"
     annotations = []
     dataset = []
     for index,row in dataframe.iterrows():
-        fname = os.path.join(img_path, row["name"]) + ".jpg"
+        # fname = os.path.join(img_path, row["name"]) + ".jpg"
+        fname = os.path.join(row["name"]) + ".jpg"
         xmin = row["xmin"]
         ymin = row["ymin"]
         xmax = row["xmax"]
