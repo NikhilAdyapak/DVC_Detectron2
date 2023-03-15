@@ -37,11 +37,11 @@ nvidia-smi = NVIDIA-SMI 525.85.12    Driver Version: 525.85.12    CUDA Version: 
 
 pip3 install --upgrade pip
 pip3 install -r requirements.txt
-pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
+pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 python -m pip install detectron2 -f \
-  https://dl.fbaipublicfiles.com/detectron2/wheels/cu101/torch1.8/index.html
+  https://dl.fbaipublicfiles.com/detectron2/wheels/cu111/torch1.9/index.html
 
-(For Current Machine torch version 1.8.0, Cuda 10.1)
+(For Current Machine torch version 1.9.0, Cuda 10.1)
 
 ````
 

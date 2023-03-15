@@ -40,8 +40,8 @@ stages:
     cmd: python3 src/transform.py data/augmented data/split data/transform
     deps:
     - path: data/augmented
-      md5: 8051efd7075c6fe43cc8a02a5157bf09.dir
-      size: 75206716
+      md5: 1fb6459ab9f29e8bef22664d6f53c28a.dir
+      size: 74870334
       nfiles: 1982
     - path: data/split
       md5: 54eb0133ea205bae31bd93ed95b82294.dir
@@ -97,8 +97,8 @@ stages:
         ingest.dcount: 3
     outs:
     - path: data/augmented
-      md5: 8051efd7075c6fe43cc8a02a5157bf09.dir
-      size: 75206716
+      md5: 1fb6459ab9f29e8bef22664d6f53c28a.dir
+      size: 74870334
       nfiles: 1982
   split:
     cmd: python3 src/split.py data/prepared data/split
@@ -133,8 +133,8 @@ stages:
         ingest.dcount: 3
     outs:
     - path: data/train
-      md5: c6babbebcb96760da0c7d94b80892fcb.dir
-      size: 835254152
+      md5: 64777d2d6fdfa105024b3c0f54bd1643.dir
+      size: 419398134
       nfiles: 4
   infer:
     cmd: python3 src/infer.py data/transform data/infer
@@ -151,8 +151,8 @@ stages:
         ingest.dcount: 3
     outs:
     - path: data/infer
-      md5: ae0583efd931a7aaadcf2071e7f2e5a2.dir
-      size: 254409
+      md5: 8fff88020ce4c9d2bc051bce5a51d5a5.dir
+      size: 254852
       nfiles: 9
   exit:
     cmd: python3 src/exit.py data/store
