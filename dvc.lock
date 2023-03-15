@@ -18,7 +18,7 @@ stages:
     cmd: python3 src/predict.py data/train data/transform data/predict
     deps:
     - path: data/train
-      md5: bd4b00f4afe4110385740c9ae410ea25.dir
+      md5: 1cb0091652615207ad28d2859120847c.dir
       size: 835441420
       nfiles: 10
     - path: data/transform
@@ -144,43 +144,34 @@ stages:
       size: 207362
       nfiles: 5
     - path: src/infer.py
-      md5: 7242a819c4ab5fdbef8b54d0d1ae9407
-      size: 12703
+      md5: 1a8c51cdf7289c89aa38aefdae0f089a
+      size: 12705
     params:
       params.yaml:
         ingest.dcount: 3
     outs:
     - path: data/infer
-      md5: 9a801ab6cac4026083637c5f822a07f6.dir
+      md5: 8a282b5855cccfdbe850b8433d7eb88b.dir
       size: 254317
       nfiles: 9
   exit:
-    cmd: python3 src/exit.py data/infer data/predict data/store
+    cmd: python3 src/exit.py data/store
     deps:
-    - path: data/infer
-      md5: 5bd846d6665aab69c21b776206bdbf19.dir
-      size: 448
-      nfiles: 2
-    - path: data/predict
-      md5: 9d3debedb466b94c4fb768b9513ec217.dir
-      size: 511
-      nfiles: 3
+    - path: data/store
+      md5: 9121d3edc95928ba3682893a0a620ff8.dir
+      size: 255618
+      nfiles: 13
     - path: src/exit.py
-      md5: f41b4ee9823cddf8a8457d0f0227fe86
-      size: 713
+      md5: 22e3163fd5eb1752c8253ad9b4fb656b
+      size: 737
     params:
       params.yaml:
-        ingest.dcount: 3
-    outs:
-    - path: data/store
-      md5: 93676d44d4d71fa21d65d8d883850040.dir
-      size: 959
-      nfiles: 5
+        ingest.dcount: 4
   compare:
     cmd: python3 src/compare.py data/infer data/predict data/store
     deps:
     - path: data/infer
-      md5: 9a801ab6cac4026083637c5f822a07f6.dir
+      md5: 8a282b5855cccfdbe850b8433d7eb88b.dir
       size: 254317
       nfiles: 9
     - path: data/predict
@@ -188,13 +179,13 @@ stages:
       size: 1299
       nfiles: 3
     - path: src/compare.py
-      md5: 33912595a6a06278c8bd28acb213477e
-      size: 2951
+      md5: 2b45761417cec5d5f85afb027368bf13
+      size: 3401
     params:
       params.yaml:
         ingest.dcount: 3
     outs:
     - path: data/store
-      md5: d751713988987e9331980363e24189ce.dir
-      size: 0
-      nfiles: 0
+      md5: 9121d3edc95928ba3682893a0a620ff8.dir
+      size: 255618
+      nfiles: 13

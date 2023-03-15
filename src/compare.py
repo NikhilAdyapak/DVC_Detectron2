@@ -2,6 +2,7 @@ import yaml,shutil
 import json
 import sys,os
 import re 
+from distutils.dir_util import copy_tree
 
 if len(sys.argv) != 4:
     sys.stderr.write('Arguments error. Usage:\n')
@@ -15,8 +16,8 @@ params = yaml.safe_load(open('params.yaml'))
 
 infer_path = os.path.join(sys.argv[1],f"v{params['ingest']['dcount']}")
 predict_path = os.path.join(sys.argv[2],f"v{params['ingest']['dcount']}")
-store_path = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
-os.makedirs(store_path, exist_ok = True)
+datastore = os.path.join(sys.argv[3],f"v{params['ingest']['dcount']}")
+os.makedirs(datastore, exist_ok = True)
 
 best_model = params['version']['best']
 
@@ -49,6 +50,9 @@ def compare(metrics_best,metrics_new,infer_flag):
     with open('params.yaml', 'w') as file:
         outputs = yaml.dump(params, file)
 
+    f = open(os.path.join(datastore,"best_model.txt"), "w")
+    f.write(best_model)
+    f.close()
 
 
 if __name__ == "__main__":
@@ -63,8 +67,8 @@ if __name__ == "__main__":
         metrics_best_path = os.path.join(sys.argv[2],"v{}".format(dig),"global_metrics_{}.json".format(dig))
         infer_flag = True
     else:
-        best_model_path = os.path.json(store_path,best_model)
-        metrics_best_path = os.path.join(best_model_path,"metrics_{}.json".format(params['ingest']['dcount']))
+        best_model_path = os.path.join(sys.argv[2],best_model)
+        metrics_best_path = os.path.join(best_model_path,"global_metrics_{}.json".format(params['ingest']['dcount']))
 
     metrics_new_path = os.path.join(predict_path,"global_metrics_{}.json".format(params['ingest']['dcount']))
 
@@ -84,6 +88,13 @@ if __name__ == "__main__":
     print("\n\n\n")
 
     compare(metrics_best, metrics_new, infer_flag)
+
+    datastore_predict = os.path.join(datastore,"predict")
+    datastore_infer = os.path.join(datastore,"infer")
+    os.makedirs(datastore_predict, exist_ok = True)
+    os.makedirs(datastore_infer, exist_ok = True)
+    copy_tree(predict_path, datastore_predict)
+    copy_tree(infer_path, datastore_infer)
 
     print("\n\n\n")
     print("-------------------------------")
