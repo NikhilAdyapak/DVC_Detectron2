@@ -24,19 +24,24 @@ dvc init
 ## 3. Installing dependencies
 To install requirements for running object detection pipeline with Detectron2
 Requires PyTorch, CUDA(if GPU Enabled)
+
+Based on cuda version, install pytorch version and check
+https://detectron2.readthedocs.io/en/latest/tutorials/install.html
+(Install Pre-Built Detectron2 (Linux only))
+
+Current System - 
+nvcc -V = 10.1, V10.1.243
+nvidia-smi = NVIDIA-SMI 525.85.12    Driver Version: 525.85.12    CUDA Version: 12.0   
+
 ```shell
+
+pip3 install --upgrade pip
 pip3 install -r requirements.txt
+pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
+python -m pip install detectron2 -f \
+  https://dl.fbaipublicfiles.com/detectron2/wheels/cu101/torch1.8/index.html
 
-Detectron2 Dependencies
-python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
-# (add --user if you don't have permission)
-
-# Or, to install it from a local clone:
-git clone https://github.com/facebookresearch/detectron2.git
-python -m pip install -e detectron2
-
-# On macOS, you may need to prepend the above commands with a few environment variables:
-CC=clang CXX=clang++ ARCHFLAGS="-arch x86_64" python -m pip install ...
+(For Current Machine torch version 1.8.0, Cuda 10.1)
 
 ````
 
@@ -53,7 +58,7 @@ ingest:
 dvc dag
 ```
 
-### 6. To run DVC pipeline
+## 6. To run DVC pipeline
 ```shell
 dvc repro
 ```
