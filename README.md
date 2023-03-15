@@ -6,10 +6,6 @@
     <img src="screenshots/detectron2_dvc_dag.png" alt="Pipeline screenshot" title="DVC Pipeline" height="500">
 </p>
 
-<br/>
-
-> ## Checkout to `clouds3` branch for pushing results/outputs to AWS S3 Bucket
-<br/>
 
 # Getting Started
 ## 1. Create a Python environment
