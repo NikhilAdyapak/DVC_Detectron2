@@ -6,6 +6,16 @@
     <img src="screenshots/detectron2_dvc_dag.png" alt="Pipeline screenshot" title="DVC Pipeline" height="500">
 </p>
 
+## Overview
+
+This repository is an MLOps template for a computer-vision workflow. It wraps a Detectron2 pedestrian detection and segmentation pipeline in DVC so the whole thing is reproducible and versioned: data, pipeline stages, parameters, and outputs are all tracked, and `dvc repro` re-runs only the stages whose inputs changed. It covers the end-to-end lifecycle, from versioned data ingestion through training to evaluation.
+
+The pipeline is defined as a DAG (shown above). Each stage declares its dependencies and outputs, so experiments stay reproducible as the dataset evolves across versions.
+
+## Tech stack
+
+Detectron2, PyTorch, DVC, and Python.
+
 
 # Getting Started
 ## 1. Create a Python environment
