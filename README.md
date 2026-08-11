@@ -99,4 +99,4 @@ dvc run -n <Stage_name>
 
 ---
 
-Built by Nikhil Adyapak · [Portfolio](https://nikhiladyapak.github.io/) · [LinkedIn](https://www.linkedin.com/in/nikhil-adyapak)
+Built by **Nikhil Adyapak** · [Portfolio](https://nikhiladyapak.github.io/) · [LinkedIn](https://www.linkedin.com/in/nikhil-adyapak) · [GitHub](https://github.com/NikhilAdyapak)
