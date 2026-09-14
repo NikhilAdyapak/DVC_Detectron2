@@ -58,7 +58,7 @@ python -m pip install detectron2 -f \
 
 ````
 
-## 4. Setting paramenters
+## 4. Setting parameters
 Here dcount is the number of versions of datasets uploaded(dcount = 1 when initialised)
 ```
 # file params.yaml
